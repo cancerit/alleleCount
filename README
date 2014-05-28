@@ -1,5 +1,3 @@
-package Sanger::CGP::AlleleCount;
-
 ##########LICENCE##########
 # Copyright (c) 2014 Genome Research Ltd. 
 #  
@@ -21,11 +19,3 @@ package Sanger::CGP::AlleleCount;
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 ##########LICENCE##########
 
-
-use strict;
-
-use base 'Exporter';
-our $VERSION = '0.1.0';
-our @EXPORT = qw($VERSION);
-
-1;
