@@ -27,7 +27,7 @@ use ExtUtils::MakeMaker;
 WriteMakefile(
   NAME          => 'alleleCount',
   VERSION_FROM  => 'lib/Sanger/CGP/AlleleCount.pm',
-  EXE_FILES     => [qw( bin/alleleCount.pl)],
+  EXE_FILES     => [qw( bin/alleleCounter.pl )],
   PREREQ_PM     => {
                      'Const::Fast' => 0.014,
                      'Try::Tiny' => 0.19,
