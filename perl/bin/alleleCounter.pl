@@ -67,7 +67,7 @@ sub option_builder {
 
 	pod2usage(0) if($opts{'h'});
   if($opts{'v'}){
-    print Sanger::CGP::AlleleCount::Genotype->VERSION."\n";
+    print Sanger::CGP::AlleleCount->VERSION."\n";
     exit;
   }
 	pod2usage(1) if(!$opts{'o'} || !$opts{'b'});
