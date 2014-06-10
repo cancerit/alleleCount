@@ -8,4 +8,5 @@
 /perl/reports
 /perl/pm_to_blib
 /perl/Makefile
+/perl/perltidy.LOG
 /setup.log

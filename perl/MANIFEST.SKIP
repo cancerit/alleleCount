@@ -60,4 +60,4 @@
 
 # specific things from this project
 ^docs/
-^setup.log
+^perltidy.LOG
