@@ -54,7 +54,7 @@ most are listed in `INSTALL`.
 * Pull a clean version of the repo and use this for the following steps.
 
 ####Cutting the release
-1. Update `lib/Sanger/CGP/Vcf.pm` to the correct version (adding rc/beta to end if applicable).
+1. Update `lib/Sanger/CGP/AlleleCount.pm` to the correct version (adding rc/beta to end if applicable).
 2. Update `Changes` to show major items.
 3. Run `./prerelease.sh`
 4. Check all tests and coverage reports are acceptable.
