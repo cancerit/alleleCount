@@ -96,7 +96,7 @@ sub get_full_loci_profile {
   $sam->max_pileup_cnt($MAX_PILEUP_DEPTH);
   $g_sam = $sam;
   my ($region, $chr, $pos, $allA, $allB);
-  print $fh "#CHR\tPOS\tCount_A\tCount_C\tCount_G\tCount_T\tGood_depth\tInputFile\n" or croak "Failed to write line: $OS_ERROR\n";
+  print $fh "#CHR\tPOS\tCount_A\tCount_C\tCount_G\tCount_T\tGood_depth\n" or croak "Failed to write line: $OS_ERROR\n";
   open my $LOCI, '<', $loci_file or croak 'Unable to open '.$loci_file.' for reading';
   while(my $line = <$LOCI>) {
     chomp $line;
