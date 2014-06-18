@@ -110,8 +110,7 @@ sub get_full_loci_profile {
     print $fh $TAB,$g_pu_data->residue_count('C') or croak "Failed to write line: $OS_ERROR\n";
     print $fh $TAB,$g_pu_data->residue_count('G') or croak "Failed to write line: $OS_ERROR\n";
     print $fh $TAB,$g_pu_data->residue_count('T') or croak "Failed to write line: $OS_ERROR\n";
-    print $fh $TAB,$g_pu_data->depth or croak "Failed to write line: $OS_ERROR\n";
-    print $fh $TAB,$bam_file,$NL or croak "Failed to write line: $OS_ERROR\n";
+    print $fh $TAB,$g_pu_data->depth,$NL or croak "Failed to write line: $OS_ERROR\n";
   }
   close $LOCI;
   return 1;
