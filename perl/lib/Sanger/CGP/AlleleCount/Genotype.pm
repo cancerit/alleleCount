@@ -1,23 +1,23 @@
 package Sanger::CGP::AlleleCount::Genotype;
 
 ##########LICENCE##########
-# Copyright (c) 2014 Genome Research Ltd. 
-#  
-# Author: CancerIT <cgpit@sanger.ac.uk> 
-#  
-# This file is part of alleleCount. 
-#  
-# alleleCount is free software: you can redistribute it and/or modify it under 
-# the terms of the GNU Affero General Public License as published by the Free 
-# Software Foundation; either version 3 of the License, or (at your option) any 
-# later version. 
-#  
-# This program is distributed in the hope that it will be useful, but WITHOUT 
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-# FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more 
-# details. 
-#  
-# You should have received a copy of the GNU Affero General Public License 
+# Copyright (c) 2014 Genome Research Ltd.
+#
+# Author: CancerIT <cgpit@sanger.ac.uk>
+#
+# This file is part of alleleCount.
+#
+# alleleCount is free software: you can redistribute it and/or modify it under
+# the terms of the GNU Affero General Public License as published by the Free
+# Software Foundation; either version 3 of the License, or (at your option) any
+# later version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+# details.
+#
+# You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 ##########LICENCE##########
 
@@ -33,13 +33,17 @@ use Sanger::CGP::AlleleCount::PileupData;
 use Bio::DB::Sam;
 use Bio::DB::Bam::AlignWrapper;
 
-use constant MAX_PILEUP_DEPTH => 1_000_000;
-use constant MIN_MAPQ => 35;
-use constant TAB => "\t";
-use constant NL => "\n";
+use Const::Fast qw(const);
+
+const my $MAX_PILEUP_DEPTH => 1_000_000;
+const my $MIN_MAPQ => 35;
+const my $MIN_PBQ => 30;
+const my $TAB => "\t";
+const my $NL => "\n";
 
 my $g_pu_data; # required for pileup;
 my $g_pb_qual;
+my $g_map_qual;
 my $g_sam;
 
 sub new {
@@ -58,10 +62,11 @@ sub new {
   Uses all snps defined in file used by ngs_cn (format slightly different)
 =cut
 sub get_full_snp6_profile {
-  my ($self, $bam_file, $fh, $min_qual) = @_;
-  $g_pb_qual = $min_qual || MIN_MAPQ;
+  my ($self, $bam_file, $fh, $min_pbq, $min_mapq) = @_;
+  $g_pb_qual = $min_pbq || $MIN_PBQ;
+  $g_map_qual = $min_mapq || $MIN_MAPQ;
   my $sam = Bio::DB::Sam->new(-bam => $bam_file);
-  $sam->max_pileup_cnt(MAX_PILEUP_DEPTH);
+  $sam->max_pileup_cnt($MAX_PILEUP_DEPTH);
   $g_sam = $sam;
   my $snp6_file = $self->ngs_cn_snps({'species'=>'HUMAN','build'=>37});
   my ($region, $chr, $pos, $allA, $allB);
@@ -73,7 +78,7 @@ sub get_full_snp6_profile {
     $g_pu_data = Sanger::CGP::AlleleCount::PileupData->new($chr, $pos, $allA, $allB);
     $region = $chr.':'.$pos.'-'.$pos;
     $sam->fast_pileup($region, \&allele_counts_callback);
-    print $fh $g_pu_data->chr,TAB,$g_pu_data->pos,TAB,$g_pu_data->count_A,TAB,$g_pu_data->count_B,TAB,$g_pu_data->depth,NL or croak "Failed to write line: $OS_ERROR\n";
+    print $fh $g_pu_data->chr,$TAB,$g_pu_data->pos,$TAB,$g_pu_data->count_A,$TAB,$g_pu_data->count_B,$TAB,$g_pu_data->depth,$NL or croak "Failed to write line: $OS_ERROR\n";
   }
   close $SNP6;
   return 1;
@@ -84,10 +89,11 @@ sub get_full_snp6_profile {
   Uses all loci defined in specified file
 =cut
 sub get_full_loci_profile {
-  my ($self, $bam_file, $fh, $loci_file, $min_qual) = @_;
-  $g_pb_qual = $min_qual || MIN_MAPQ;
+  my ($self, $bam_file, $fh, $loci_file, $min_pbq, $min_mapq) = @_;
+  $g_pb_qual = $min_pbq || $MIN_PBQ;
+  $g_map_qual = $min_mapq || $MIN_MAPQ;
   my $sam = Bio::DB::Sam->new(-bam => $bam_file);
-  $sam->max_pileup_cnt(MAX_PILEUP_DEPTH);
+  $sam->max_pileup_cnt($MAX_PILEUP_DEPTH);
   $g_sam = $sam;
   my ($region, $chr, $pos, $allA, $allB);
   print $fh "#CHR\tPOS\tCount_A\tCount_C\tCount_G\tCount_T\tGood_depth\tInputFile\n" or croak "Failed to write line: $OS_ERROR\n";
@@ -99,13 +105,13 @@ sub get_full_loci_profile {
     $region = $chr.':'.$pos.'-'.$pos;
     $sam->fast_pileup($region, \&allele_counts_callback);
     print $fh $g_pu_data->chr or croak "Failed to write line: $OS_ERROR\n";
-    print $fh TAB,$g_pu_data->pos or croak "Failed to write line: $OS_ERROR\n";
-    print $fh TAB,$g_pu_data->residue_count('A') or croak "Failed to write line: $OS_ERROR\n";
-    print $fh TAB,$g_pu_data->residue_count('C') or croak "Failed to write line: $OS_ERROR\n";
-    print $fh TAB,$g_pu_data->residue_count('G') or croak "Failed to write line: $OS_ERROR\n";
-    print $fh TAB,$g_pu_data->residue_count('T') or croak "Failed to write line: $OS_ERROR\n";
-    print $fh TAB,$g_pu_data->depth or croak "Failed to write line: $OS_ERROR\n";
-    print $fh TAB,$bam_file,NL or croak "Failed to write line: $OS_ERROR\n";
+    print $fh $TAB,$g_pu_data->pos or croak "Failed to write line: $OS_ERROR\n";
+    print $fh $TAB,$g_pu_data->residue_count('A') or croak "Failed to write line: $OS_ERROR\n";
+    print $fh $TAB,$g_pu_data->residue_count('C') or croak "Failed to write line: $OS_ERROR\n";
+    print $fh $TAB,$g_pu_data->residue_count('G') or croak "Failed to write line: $OS_ERROR\n";
+    print $fh $TAB,$g_pu_data->residue_count('T') or croak "Failed to write line: $OS_ERROR\n";
+    print $fh $TAB,$g_pu_data->depth or croak "Failed to write line: $OS_ERROR\n";
+    print $fh $TAB,$bam_file,$NL or croak "Failed to write line: $OS_ERROR\n";
   }
   close $LOCI;
   return 1;
@@ -118,7 +124,7 @@ sub allele_counts_callback {
     next if($p->indel || $p->is_refskip);
     my $a = $p->alignment;
     my $flagValue = $a->flag;
-    
+
     next if(($flagValue & 4)); #Unmapped read
     next if(($flagValue & 8)); #Mate unmapped read
     next if(!($flagValue & 2)); #Not a proper pair
@@ -126,14 +132,13 @@ sub allele_counts_callback {
     next if(($flagValue & 256)); #Not primary alignment
     next if(($flagValue & 512)); #Fails vendor checks
     next if(($flagValue & 2048)); #Supp. alignment
-    next if($a->qual < $g_pb_qual); # check mapping quality
-    
-    # NB, we are using the same cutoff for mapping quality and base quality checks.  
+    next if($a->qual < $g_map_qual); # check mapping quality
+
+    # NB, we are using the same cutoff for mapping quality and base quality checks.
 
     if($g_pb_qual) {
       my $fa = Bio::DB::Bam::AlignWrapper->new($a, $g_sam);
-      my $qual = ($fa->qscore)[$p->qpos];
-      next if($qual <= $g_pb_qual);
+      next if(($fa->qscore)[$p->qpos] < $g_pb_qual);
     }
 
     # get the base at this pos
