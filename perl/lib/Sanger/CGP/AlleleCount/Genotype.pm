@@ -134,8 +134,6 @@ sub allele_counts_callback {
     next if(($flagValue & 2048)); #Supp. alignment
     next if($a->qual < $g_map_qual); # check mapping quality
 
-    # NB, we are using the same cutoff for mapping quality and base quality checks.
-
     if($g_pb_qual) {
       my $fa = Bio::DB::Bam::AlignWrapper->new($a, $g_sam);
       next if(($fa->qscore)[$p->qpos] < $g_pb_qual);
