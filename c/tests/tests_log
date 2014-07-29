@@ -1,0 +1,8 @@
+DEBUG tests/alleleCounter_tests.c: main:30 ----- RUNNING: ./tests/alleleCounter_tests
+DEBUG tests/bam_access_tests.c: main:30 ----- RUNNING: ./tests/bam_access_tests
+DEBUG tests/alleleCounter_tests.c: main:30 ----- RUNNING: ./tests/alleleCounter_tests
+DEBUG tests/bam_access_tests.c: main:30 ----- RUNNING: ./tests/bam_access_tests
+DEBUG tests/alleleCounter_tests.c: main:30 ----- RUNNING: ./tests/alleleCounter_tests
+DEBUG tests/bam_access_tests.c: main:30 ----- RUNNING: ./tests/bam_access_tests
+DEBUG tests/alleleCounter_tests.c: main:30 ----- RUNNING: ./tests/alleleCounter_tests
+DEBUG tests/bam_access_tests.c: main:30 ----- RUNNING: ./tests/bam_access_tests
