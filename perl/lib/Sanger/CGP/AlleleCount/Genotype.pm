@@ -45,6 +45,7 @@ my $g_pu_data; # required for pileup;
 my $g_pb_qual;
 my $g_map_qual;
 my $g_sam;
+my $this_pos;
 
 sub new {
   my ($class, $opts) = @_;
@@ -76,6 +77,7 @@ sub get_full_snp6_profile {
     chomp $line;
     ($chr, $pos, undef, undef, $allA, $allB) = split /\s/, $line;
     $g_pu_data = Sanger::CGP::AlleleCount::PileupData->new($chr, $pos, $allA, $allB);
+    $this_pos = $pos;
     $region = $chr.':'.$pos.'-'.$pos;
     $sam->fast_pileup($region, \&allele_counts_callback);
     print $fh $g_pu_data->chr,$TAB,$g_pu_data->pos,$TAB,$g_pu_data->count_A,$TAB,$g_pu_data->count_B,$TAB,$g_pu_data->depth,$NL or croak "Failed to write line: $OS_ERROR\n";
@@ -102,10 +104,11 @@ sub get_full_loci_profile {
     chomp $line;
     ($chr, $pos) = split /\s/, $line;
     $g_pu_data = Sanger::CGP::AlleleCount::PileupData->new($chr, $pos);
+    $this_pos = $pos;
     $region = $chr.':'.$pos.'-'.$pos;
     $sam->fast_pileup($region, \&allele_counts_callback);
-    print $fh $g_pu_data->chr or croak "Failed to write line: $OS_ERROR\n";
-    print $fh $TAB,$g_pu_data->pos or croak "Failed to write line: $OS_ERROR\n";
+    print $fh $chr or croak "Failed to write line: $OS_ERROR\n";
+    print $fh $TAB,$pos or croak "Failed to write line: $OS_ERROR\n";
     print $fh $TAB,$g_pu_data->residue_count('A') or croak "Failed to write line: $OS_ERROR\n";
     print $fh $TAB,$g_pu_data->residue_count('C') or croak "Failed to write line: $OS_ERROR\n";
     print $fh $TAB,$g_pu_data->residue_count('G') or croak "Failed to write line: $OS_ERROR\n";
@@ -118,10 +121,12 @@ sub get_full_loci_profile {
 
 sub allele_counts_callback {
   my ($seqid, $pos, $pu) = @_;
-  return if($pos != $g_pu_data->pos);
+  return if($pos != $this_pos);
   foreach my $p (@{$pu}) {
+
     next if($p->indel || $p->is_refskip);
     my $a = $p->alignment;
+
     my $flagValue = $a->flag;
 
     next if(($flagValue & 4)); #Unmapped read
@@ -131,15 +136,15 @@ sub allele_counts_callback {
     next if(($flagValue & 256)); #Not primary alignment
     next if(($flagValue & 512)); #Fails vendor checks
     next if(($flagValue & 2048)); #Supp. alignment
-    next if($a->qual < $g_map_qual); # check mapping quality
+		next if($a->qual < $g_map_qual); # check mapping quality
 
-    if($g_pb_qual) {
-      my $fa = Bio::DB::Bam::AlignWrapper->new($a, $g_sam);
-      next if(($fa->qscore)[$p->qpos] < $g_pb_qual);
+		my $qpos = $p->qpos;
+    if($g_pb_qual){
+    	next if ((unpack('C*',$a->_qscore))[$qpos] < $g_pb_qual);
     }
 
     # get the base at this pos
-    my $qbase  = substr($a->qseq, $p->qpos, 1);
+    my $qbase  = substr($a->qseq, $qpos, 1);
     $g_pu_data->register_allele($qbase);
   }
   return 1;
