@@ -69,7 +69,7 @@ static int pileup_algo_func(uint32_t tid, uint32_t pos, int n, const bam_pileup1
    		const bam_pileup1_t *p = pil + i;
 			int qual = bam1_qual(p->b)[p->qpos];
 			uint8_t c = bam1_seqi(bam1_seq(p->b), p->qpos);
-			if(p->indel==0 &&  qual >= min_base_qual
+			if(!(p->is_del) &&  qual >= min_base_qual
 								&&  p->b->core.qual >= min_map_qual
 								&& (c == 1 || c == 2 || c == 4 || c == 8)){
 				//Now we add a new read pos struct to the list since the read is valid.
@@ -116,6 +116,7 @@ static int fetch_algo_func(const bam1_t *b, void *data){
 }
 
 loci_stats *bam_access_get_position_base_counts(char *chr, int pos){
+	char *region = NULL;
 	loci_stats *stats = malloc(sizeof(loci_stats *));
 	check_mem(stats);
 	stats->base_counts = malloc(sizeof(int) * 4);
@@ -126,7 +127,6 @@ loci_stats *bam_access_get_position_base_counts(char *chr, int pos){
 	stats->base_counts[3] = 0;
 	fholder->stats = stats;
 
-	char *region;
 	region = malloc(sizeof(chr)+sizeof(":")+sizeof("-")+(sizeof(char)*10));
 	sprintf(region,"%s:%d-%d",chr,pos,pos);
 	fholder->beg = pos;

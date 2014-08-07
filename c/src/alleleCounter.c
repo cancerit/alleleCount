@@ -224,6 +224,7 @@ int main(int argc, char *argv[]){
 	bam_access_min_base_qual(min_base_q);
 	bam_access_min_map_qual(min_map_q);
 
+	FILE *loci_in = NULL;
 	//Open output file for writing
 	FILE *output = fopen(out_file,"w");
   check(output != NULL, "Error opening file %s for write.",out_file);
@@ -235,10 +236,9 @@ int main(int argc, char *argv[]){
 	check(chk == 0,"Error trying to open bam file '%s'.",bam_file);
 
 	//Open loci file
-	FILE *loci_in = fopen(loci_file,"r");
+	loci_in = fopen(loci_file,"r");
 	check(loci_in != NULL, "Error opening loci file %s for reading.",loci_file);
 	char chr[50];
-	int chr_d;
 	int pos;
 	char allele_A;
 	char allele_B;
