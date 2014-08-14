@@ -124,7 +124,7 @@ sub allele_counts_callback {
   return if($pos != $this_pos);
   foreach my $p (@{$pu}) {
 
-    next if($p->indel || $p->is_refskip);
+    next if($p->is_del || $p->is_refskip);
     my $a = $p->alignment;
 
     my $flagValue = $a->flag;
