@@ -24,6 +24,9 @@
 #include <stdio.h>
 #include <dbg.h>
 #include <assert.h>
+#include <limits.h>
+
+#define PO10_LIMIT (INT_MAX/10)
 
 file_holder *fholder;
 int counter = -1;
@@ -115,6 +118,21 @@ static int fetch_algo_func(const bam1_t *b, void *data){
   return 0;
 }
 
+int no_of_digits(int i){
+	int n,po10;
+
+  if (i < 0) i = -i;
+  n=1;
+  po10=10;
+  while(i>=po10)
+  {
+    n++;
+    if (po10 > PO10_LIMIT) break;
+    po10*=10;
+  }
+  return n;
+}
+
 loci_stats *bam_access_get_position_base_counts(char *chr, int pos){
 	char *region = NULL;
 	loci_stats *stats = malloc(sizeof(loci_stats *));
@@ -127,7 +145,7 @@ loci_stats *bam_access_get_position_base_counts(char *chr, int pos){
 	stats->base_counts[3] = 0;
 	fholder->stats = stats;
 
-	region = malloc(sizeof(chr)+sizeof(":")+sizeof("-")+(sizeof(char)*33));
+	region = malloc(sizeof(chr)+sizeof(":")+sizeof("-")+(sizeof(char)*((no_of_digits(pos)*2)+1)));
 	sprintf(region,"%s:%d-%d",chr,pos,pos);
 	fholder->beg = pos;
 	fholder->end = pos;
