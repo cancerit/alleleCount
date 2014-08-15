@@ -127,7 +127,7 @@ loci_stats *bam_access_get_position_base_counts(char *chr, int pos){
 	stats->base_counts[3] = 0;
 	fholder->stats = stats;
 
-	region = malloc(sizeof(chr)+sizeof(":")+sizeof("-")+(sizeof(char)*10));
+	region = malloc(sizeof(chr)+sizeof(":")+sizeof("-")+(sizeof(char)*30));
 	sprintf(region,"%s:%d-%d",chr,pos,pos);
 	fholder->beg = pos;
 	fholder->end = pos;
