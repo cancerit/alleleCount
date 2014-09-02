@@ -1,9 +1,9 @@
-package Sanger::CGP::AlleleCount;
+#!/usr/bin/perl
 
 ##########LICENCE##########
 # Copyright (c) 2014 Genome Research Ltd.
 #
-# Author: CancerIT <cgpit@sanger.ac.uk>
+# Author:  CancerIT <cgpit@sanger.ac.uk>
 #
 # This file is part of alleleCount.
 #
@@ -23,9 +23,26 @@ package Sanger::CGP::AlleleCount;
 
 
 use strict;
+use Carp;
+use English qw( -no_match_vars );
+use warnings FATAL => 'all';
 
-use base 'Exporter';
-our $VERSION = '1.2.0';
-our @EXPORT = qw($VERSION);
+use Getopt::Long 'GetOptions';
+use Pod::Usage;
+use Const::Fast qw(const);
 
-1;
+use Sanger::CGP::AlleleCount;
+
+print Sanger::CGP::AlleleCount->VERSION."\n";
+
+__END__
+
+=head1 NAME
+
+alleleCounter_version.pl - Supply a version numnber for the alleleCounter code.
+
+=head1 SYNOPSIS
+
+alleleCounter_version.pl
+
+=cut
