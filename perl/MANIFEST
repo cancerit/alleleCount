@@ -1,4 +1,5 @@
 bin/alleleCounter.pl
+bin/alleleCounter_version.pl
 bin/cpanm
 docs.tar.gz
 lib/Sanger/CGP/AlleleCount.pm

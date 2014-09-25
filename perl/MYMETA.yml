@@ -18,6 +18,8 @@ no_index:
     - t
     - inc
 requires:
+  Bio::DB::Sam: 1.39
+  Bio::Root::Version: 1.006923
   Const::Fast: 0.014
   Devel::Cover: 1.09
   File::Which: 0.05
@@ -25,4 +27,4 @@ requires:
   Pod::Coverage: 0.23
   Test::Fatal: 0.013
   Try::Tiny: 0.19
-version: v1.1.0
+version: v1.2.1
