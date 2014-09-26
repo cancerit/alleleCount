@@ -36,5 +36,7 @@ WriteMakefile(
                      'Test::Fatal' => 0.013,
                      'Devel::Cover' => 1.09,
                      'Pod::Coverage' => 0.23,
+                     'Bio::DB::Sam' => 1.39,
+                     'Bio::Root::Version' => 1.006923,
                    }
 );

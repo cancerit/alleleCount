@@ -114,26 +114,23 @@ mkdir -p $SETUP_DIR
 
 cd $SETUP_DIR
 
-SAMEXISTS=`which samtools`
-if [ "x$SAMEXISTS" == "x" ] ; then
+if [ ! -e "$INST_PATH/bin/samtools" ] ; then
   echo -n "Building samtools ..."
-  if [ -e $SETUP_DIR/samtools.success ]; then
+  if [ -e "$SETUP_DIR/samtools.success" ]; then
     echo -n " previously installed ...";
   else
     cd $SETUP_DIR
-    if( [ "x$SAMTOOLS" == "x" ] ); then
-      (
+    (
       set -x
-      if [ ! -e samtools ]; then
+      if [ ! -e $SETUP_DIR/samtools ]; then
         get_distro "samtools" $SOURCE_SAMTOOLS
         perl -i -pe 's/^CFLAGS=\s*/CFLAGS=-fPIC / unless /\b-fPIC\b/' samtools/Makefile
       fi
       make -C samtools -j$CPU
       set +x
-      cp samtools/samtools $INST_PATH/bin/.
+      cp $SETUP_DIR/samtools/samtools $INST_PATH/bin/.
       touch $SETUP_DIR/samtools.success
-      )>>$INIT_DIR/setup.log 2>&1
-    fi
+    )>>$INIT_DIR/setup.log 2>&1
   fi
   done_message "" "Failed to build samtools."
 else
@@ -141,6 +138,27 @@ else
 fi
 
 export SAMTOOLS="$SETUP_DIR/samtools"
+
+if [ ! -e "$INST_PATH/bin/alleleCounter" ] ; then
+  echo -n "Building alleleCounter ..."
+  if [ -e "$SETUP_DIR/alleleCounter.success" ]; then
+    echo -n " previously installed ...";
+  else
+    cd $INIT_DIR
+    (
+      set -x
+      mkdir -p $INIT_DIR/c/bin
+      make -C c -j$CPU
+      cp $INIT_DIR/c/bin/alleleCounter $INST_PATH/bin/.
+      make -C c clean
+      touch $SETUP_DIR/alleleCounter.success
+    )>>$INIT_DIR/setup.log 2>&1
+  fi
+  done_message "" "Failed to build alleleCounter."
+else
+  echo "alleleCounter - already installed"
+fi
+
 
 #add bin path for install tests
 export PATH="$INST_PATH/bin:$PATH"
@@ -154,7 +172,7 @@ if ! ( perl -MExtUtils::MakeMaker -e 1 >/dev/null 2>&1); then
 fi
 (
   set -x
-  $INIT_DIR/perl/bin/cpanm -v --mirror http://cpan.metacpan.org -notest -l $INST_PATH/ --installdeps . < /dev/null
+  $INIT_DIR/perl/bin/cpanm -v --mirror http://cpan.metacpan.org --notest -l $INST_PATH/ --installdeps $INIT_DIR/perl/. < /dev/null
   set +x
 ) >>$INIT_DIR/setup.log 2>&1
 done_message "" "Failed during installation of core dependencies."

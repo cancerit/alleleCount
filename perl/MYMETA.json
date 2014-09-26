@@ -32,6 +32,8 @@
       },
       "runtime" : {
          "requires" : {
+            "Bio::DB::Sam" : "1.39",
+            "Bio::Root::Version" : "1.006923",
             "Const::Fast" : "0.014",
             "Devel::Cover" : "1.09",
             "File::Which" : "0.05",
@@ -43,5 +45,5 @@
       }
    },
    "release_status" : "stable",
-   "version" : "v1.1.0"
+   "version" : "v1.2.1"
 }
