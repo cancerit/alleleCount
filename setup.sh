@@ -114,28 +114,24 @@ mkdir -p $SETUP_DIR
 
 cd $SETUP_DIR
 
-if [ ! -e "$INST_PATH/bin/samtools" ] ; then
-  echo -n "Building samtools ..."
-  if [ -e "$SETUP_DIR/samtools.success" ]; then
-    echo -n " previously installed ...";
-  else
-    cd $SETUP_DIR
-    (
-      set -x
-      if [ ! -e $SETUP_DIR/samtools ]; then
-        get_distro "samtools" $SOURCE_SAMTOOLS
-        perl -i -pe 's/^CFLAGS=\s*/CFLAGS=-fPIC / unless /\b-fPIC\b/' samtools/Makefile
-      fi
-      make -C samtools -j$CPU
-      set +x
-      cp $SETUP_DIR/samtools/samtools $INST_PATH/bin/.
-      touch $SETUP_DIR/samtools.success
-    )>>$INIT_DIR/setup.log 2>&1
-  fi
-  done_message "" "Failed to build samtools."
+echo -n "Building samtools ..."
+if [ -e "$SETUP_DIR/samtools.success" ]; then
+  echo -n " previously installed ...";
 else
-  echo "samtools - already installed"
+  cd $SETUP_DIR
+  (
+    set -x
+    if [ ! -e $SETUP_DIR/samtools ]; then
+      get_distro "samtools" $SOURCE_SAMTOOLS
+      perl -i -pe 's/^CFLAGS=\s*/CFLAGS=-fPIC / unless /\b-fPIC\b/' samtools/Makefile
+    fi
+    make -C samtools -j$CPU
+    set +x
+    cp $SETUP_DIR/samtools/samtools $INST_PATH/bin/.
+    touch $SETUP_DIR/samtools.success
+  )>>$INIT_DIR/setup.log 2>&1
 fi
+done_message "" "Failed to build samtools."
 
 export SAMTOOLS="$SETUP_DIR/samtools"
 
@@ -146,7 +142,7 @@ if [ ! -e "$INST_PATH/bin/alleleCounter" ] ; then
   else
     cd $INIT_DIR
     (
-      set -x
+      set -xe
       mkdir -p $INIT_DIR/c/bin
       make -C c -j$CPU
       cp $INIT_DIR/c/bin/alleleCounter $INST_PATH/bin/.
