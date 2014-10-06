@@ -22,7 +22,7 @@
 ##########LICENCE##########
 
 
-SOURCE_SAMTOOLS="https://github.com/samtools/samtools/archive/0.1.19.tar.gz"
+SOURCE_SAMTOOLS="https://github.com/samtools/samtools/archive/0.1.20.tar.gz"
 
 done_message () {
     if [ $? -eq 0 ]; then
