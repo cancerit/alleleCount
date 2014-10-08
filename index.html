@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="description" content="alleleCount : Support code for NGS copy number algorithms">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>alleleCount</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/cancerit/alleleCount">View on GitHub</a>
+
+          <h1 id="project_title">alleleCount</h1>
+          <h2 id="project_tagline">Support code for NGS copy number algorithms</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/cancerit/alleleCount/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/cancerit/alleleCount/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>
+<a name="allelecount" class="anchor" href="#allelecount"><span class="octicon octicon-link"></span></a>alleleCount</h1>
+
+<p>The alleleCount package primarily exists to prevent code duplication between some other projects,
+specifically AscatNGS and Battenburg.</p>
+
+<p>All that this contains is a perl program to calculate the allele fraction for locations provided in
+an input file.</p>
+
+<hr><h3>
+<a name="dependenciesinstall" class="anchor" href="#dependenciesinstall"><span class="octicon octicon-link"></span></a>Dependencies/Install</h3>
+
+<p>Some of the code included in this package has dependencies on several C packages:</p>
+
+<ul>
+<li>
+<a href="https://github.com/samtools">samtools</a>, via <a href="http://search.cpan.org/%7Elds/Bio-SamTools/">Bio::DB::Sam</a>
+</li>
+</ul><p>And various utility perl modules.</p>
+
+<p>To install please run:</p>
+
+<pre><code>./setup.sh /some/install/location
+</code></pre>
+
+<p>Please be aware that this expects basic C compilation libraries and tools to be available,
+most are listed in <code>INSTALL</code>.</p>
+
+<hr><h1>
+<a name="licence" class="anchor" href="#licence"><span class="octicon octicon-link"></span></a>LICENCE</h1>
+
+<p>Copyright (c) 2014 Genome Research Ltd.</p>
+
+<p>Author: CancerIT <a href="mailto:cgpit@sanger.ac.uk">cgpit@sanger.ac.uk</a></p>
+
+<p>This file is part of alleleCount.</p>
+
+<p>alleleCount is free software: you can redistribute it and/or modify it under
+the terms of the GNU Affero General Public License as published by the Free
+Software Foundation; either version 3 of the License, or (at your option) any
+later version.</p>
+
+<p>This program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+details.</p>
+
+<p>You should have received a copy of the GNU Affero General Public License
+along with this program. If not, see <a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>.</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">alleleCount maintained by <a href="https://github.com/cancerit">cancerit</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
