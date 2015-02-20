@@ -23,7 +23,8 @@
 #define _bam_access_h
 
 #include <ctype.h>
-#include "sam.h"
+#include <htslib/hts.h>
+#include <htslib/sam.h>
 
 typedef struct loci_stats{
 	int *base_counts;
@@ -31,19 +32,20 @@ typedef struct loci_stats{
 
 typedef struct file_holder{
 	int beg, end;
-	samfile_t *in;
-	bam_index_t *idx;
+	htsFile *in;
+	hts_idx_t *idx;
 	loci_stats *stats;
+	bam_hdr_t *head;
 } file_holder;
 
 void bam_access_min_base_qual(int qual);
 
 void bam_access_min_map_qual(int qual);
 
-int bam_access_openbam(char *bam_file);
+int bam_access_openhts(char *hts_file, char *ref_file);
 
 loci_stats *bam_access_get_position_base_counts(char *chr, int pos);
 
-void bam_access_closebam();
+void bam_access_closehts();
 
 #endif

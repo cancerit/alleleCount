@@ -29,9 +29,10 @@
 
 static int min_base_q = 20;
 static int min_map_q = 35;
-static char *bam_file;
+static char *hts_file;
 static char *loci_file;
 static char *out_file;
+static char *ref_file;
 static int snp6 = 0;
 
 int check_exist(char *fname){
@@ -46,8 +47,10 @@ int check_exist(char *fname){
 void alleleCounter_print_usage (int exit_code){
 	printf ("Usage: alleleCounter -l loci_file.txt -b sample.bam -o output.txt [-m int] \n\n");
   printf (" -l --loci-file [file]           Path to loci file.\n");
-  printf (" -b --bam-file [file]            Path to sample bam file.\n");
+  printf (" -b --hts-file [file]            Path to sample HTS file.\n");
+  printf (" -r --ref-file [file]            Path to reference fasta file.\n");
   printf (" -o --output-file [file]         Path write output file.\n\n");
+
 	printf ("Optional\n");
 	printf (" -m  --min-base-qual [int]       Minimum base quality [Default: %d].\n",min_base_q);
 	printf (" -q  --min-map-qual [int]        Minimum mapping quality [Default: %d].\n",min_map_q);
@@ -59,7 +62,8 @@ void alleleCounter_setup_options(int argc, char *argv[]){
 	const struct option long_opts[] =
 	{
              	{"loci-file", required_argument, 0, 'l'},
-             	{"bam-file", required_argument, 0, 'b'},
+             	{"hts-file", required_argument, 0, 'b'},
+             	{"ref-file", required_argument, 0, 'r'},
              	{"output-file",required_argument , 0, 'o'},
              	{"min-base-qual", required_argument, 0, 'm'},
 							{"min-map-qual", required_argument, 0, 'q'},
@@ -72,8 +76,7 @@ void alleleCounter_setup_options(int argc, char *argv[]){
    int iarg = 0;
 
    //Iterate through options
-   while((iarg = getopt_long(argc, argv, "l:b:m:o:q:hs",
-                            								long_opts, &index)) != -1){
+   while((iarg = getopt_long(argc, argv, "l:b:m:o:q:r:hs", long_opts, &index)) != -1){
    	switch(iarg){
    		case 'h':
          	alleleCounter_print_usage(0);
@@ -87,12 +90,16 @@ void alleleCounter_setup_options(int argc, char *argv[]){
       		min_base_q = atoi(optarg);
       		break;
 
+        case 'r':
+          ref_file = optarg;
+          break;
+
       	case 'q':
       		min_map_q = atoi(optarg);
       		break;
 
       	case 'b':
-      		bam_file = optarg;
+      		hts_file = optarg;
       		break;
 
       	case 'o':
@@ -118,8 +125,12 @@ void alleleCounter_setup_options(int argc, char *argv[]){
    	printf("Loci file %s does not appear to exist.\n",loci_file);
    	alleleCounter_print_usage(1);
    }
-   if(check_exist(bam_file) != 1){
-   	printf("Loci file %s does not appear to exist.\n",bam_file);
+   if(check_exist(hts_file) != 1){
+   	printf("HTS file %s does not appear to exist.\n",hts_file);
+   	alleleCounter_print_usage(1);
+   }
+   if(check_exist(ref_file) != 1){
+   	printf("Reference file %s does not appear to exist.\n",ref_file);
    	alleleCounter_print_usage(1);
    }
    return;
@@ -198,6 +209,7 @@ int get_position_info_from_file(char *line, char *chr, int *pos,int snp6, char *
 		}else{
 			//Try again but a string match
 			chk = sscanf(line,"%s%*[ \t]%d%*[ \t]%*s%*[ \t]%*s%*[ \t]%c%*[ \t]%c",chr,pos,allele_A,allele_B);
+			check(chk==4,"Error attempting string match of allele position info from SNP6 line %s.",line);
 		}
 		check(chk==2,"Error parsing SNP6 file line number %d: '%s'.",i,line);
 	}else{
@@ -208,6 +220,7 @@ int get_position_info_from_file(char *line, char *chr, int *pos,int snp6, char *
 		}else{
 			//Try again but a string match
 			chk = sscanf(line,"%s%*[ \t]%d",chr,pos);
+			check(chk==2,"Error parsing loci file line number %d as a string match: '%s'.",i,line);
 		}
 		check(chk==2,"Error parsing loci file line number %d: '%s'.",i,line);
 	}
@@ -219,9 +232,9 @@ error:
 int main(int argc, char *argv[]){
 	//Get the options commandline
 	alleleCounter_setup_options(argc,argv);
-
 	//Set the min base and mapping quality.
 	bam_access_min_base_qual(min_base_q);
+
 	bam_access_min_map_qual(min_map_q);
 
 	FILE *loci_in = NULL;
@@ -232,8 +245,9 @@ int main(int argc, char *argv[]){
 	check(chk >= 0,"Error trying to write header '%s'.",out_file);
 	//Open bam file and iterate through chunks until we reach the cutoff.
 	chk = -1;
-	chk = bam_access_openbam(bam_file);
-	check(chk == 0,"Error trying to open bam file '%s'.",bam_file);
+
+	chk = bam_access_openhts(hts_file,ref_file);
+	check(chk == 0,"Error trying to open sequence/index files '%s'.",hts_file);
 
 	//Open loci file
 	loci_in = fopen(loci_file,"r");
@@ -261,15 +275,15 @@ int main(int argc, char *argv[]){
 
 	//Close files.
 	fclose(loci_in);
-	bam_access_closebam();
+	bam_access_closehts();
 	fclose(output);
 	return 0;
 
 error:
-	bam_access_closebam();
+	bam_access_closehts();
 	if(loci_in) fclose(loci_in);
 	if(output) fclose(output);
-	if(bam_file) free(bam_file);
+	if(hts_file) free(hts_file);
 	if(out_file) free(out_file);
 	if(loci_file) free(loci_file);
 	return 1;
