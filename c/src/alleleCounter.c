@@ -48,7 +48,7 @@ void alleleCounter_print_usage (int exit_code){
 	printf ("Usage: alleleCounter -l loci_file.txt -b sample.bam -o output.txt [-m int] \n\n");
   printf (" -l --loci-file [file]           Path to loci file.\n");
   printf (" -b --hts-file [file]            Path to sample HTS file.\n");
-  printf (" -r --ref-file [file]            Path to reference fasta file.\n");
+  printf (" -r --ref-file [file]            Path to reference fasta index .fai file.\n");
   printf (" -o --output-file [file]         Path write output file.\n\n");
 
 	printf ("Optional\n");
