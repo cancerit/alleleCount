@@ -11,3 +11,6 @@
 /perl/perltidy.LOG
 /setup.log
 /c/bin/*
+c/src/*.o
+c/tests/*_tests
+c/tests/tests_log
