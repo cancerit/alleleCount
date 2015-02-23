@@ -23,6 +23,7 @@
 
 
 SOURCE_SAMTOOLS="https://github.com/samtools/samtools/archive/0.1.20.tar.gz"
+SOURCE_HTSLIB="https://github.com/samtools/htslib/archive/1.2.tar.gz"
 
 done_message () {
     if [ $? -eq 0 ]; then
@@ -135,25 +136,39 @@ done_message "" "Failed to build samtools."
 
 export SAMTOOLS="$SETUP_DIR/samtools"
 
-if [ ! -e "$INST_PATH/bin/alleleCounter" ] ; then
-  echo -n "Building alleleCounter ..."
-  if [ -e "$SETUP_DIR/alleleCounter.success" ]; then
-    echo -n " previously installed ...";
-  else
-    cd $INIT_DIR
-    (
-      set -xe
-      mkdir -p $INIT_DIR/c/bin
-      make -C c -j$CPU
-      cp $INIT_DIR/c/bin/alleleCounter $INST_PATH/bin/.
-      make -C c clean
-      touch $SETUP_DIR/alleleCounter.success
-    )>>$INIT_DIR/setup.log 2>&1
-  fi
-  done_message "" "Failed to build alleleCounter."
+echo -n "Building htslib ..."
+if [ -e $SETUP_DIR/htslib.success ]; then
+  echo -n " previously installed ...";
 else
-  echo "alleleCounter - already installed"
+  cd $SETUP_DIR
+  (
+  set -xe
+  if [ ! -e htslib ]; then
+    get_distro "htslib" $SOURCE_HTSLIB
+  fi
+  make -C htslib -j$CPU
+  touch $SETUP_DIR/htslib.success
+  )>>$INIT_DIR/setup.log 2>&1
 fi
+done_message "" "Failed to build htslib."
+
+export HTSLIB="$SETUP_DIR/htslib"
+
+echo -n "Building alleleCounter ..."
+if [ -e "$SETUP_DIR/alleleCounter.success" ]; then
+  echo -n " previously installed ...";
+else
+  cd $INIT_DIR
+  (
+    set -xe
+    mkdir -p $INIT_DIR/c/bin
+    make -C c -j$CPU
+    cp $INIT_DIR/c/bin/alleleCounter $INST_PATH/bin/.
+    make -C c clean
+    touch $SETUP_DIR/alleleCounter.success
+  )>>$INIT_DIR/setup.log 2>&1
+fi
+done_message "" "Failed to build alleleCounter."
 
 
 #add bin path for install tests
