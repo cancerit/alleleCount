@@ -20,6 +20,15 @@ details.
 You should have received a copy of the GNU Affero General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+1. The usage of a range of years within a copyright statement contained within
+this distribution should be interpreted as being equivalent to a list of years
+including the first and last year specified and all consecutive years between
+them. For example, a copyright statement that reads ‘Copyright (c) 2005, 2007-
+2009, 2011-2012’ should be interpreted as being identical to a statement that
+reads ‘Copyright (c) 2005, 2007, 2008, 2009, 2011, 2012’ and a copyright
+statement that reads ‘Copyright (c) 2005-2012’ should be interpreted as being
+identical to a statement that reads ‘Copyright (c) 2005, 2006, 2007, 2008,
+2009, 2010, 2011, 2012’."
 
 alleleCount
 ===========
@@ -30,14 +39,19 @@ specifically AscatNGS and Battenburg.
 All that this contains is a perl program to calculate the allele fraction for locations provided in
 an input file.
 
+The C version of bam_stats supports both BAM and CRAM input.
+
 ---
 
 ###Dependencies/Install
 Some of the code included in this package has dependencies on several C packages:
 
-* [samtools](https://github.com/samtools), via [Bio::DB::Sam](http://search.cpan.org/~lds/Bio-SamTools/)
+* [samtools v0.1.20](https://github.com/samtools), via [Bio::DB::Sam](http://search.cpan.org/~lds/Bio-SamTools/)
+* [htslib](https://github.com/samtools/htslib)
 
 And various utility perl modules.
+
+(samtools is only required for legacy perl version of bam_stats.pl and will be removed at a later date).
 
 Once complete please run:
 

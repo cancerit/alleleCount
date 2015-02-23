@@ -6,19 +6,24 @@ CC = gcc -O3
 # -Wall turns on most warnings from compiler
 CFLAGS = -g -Wall
 
+#Location of samtools/htslib libraries
+HTSLOC?=$(HTSLIB)
+
+HTSTMP?=./htslib_tmp
+
 #Define locations of header files
-OPTINC?= -I$(SAMTOOLS)/
-INCLUDES= -I./src/ $(OPTINC) -rdynamic
+OPTINC?=-I$(HTSLOC)/
+INCLUDES= -Isrc/ $(OPTINC) -rdynamic
 
 # define library paths in addition to /usr/lib
 #   if I wanted to include libraries not in /usr/lib I'd specify
 #   their path using -Lpath, something like:
-LFLAGS ?= -L$(SAMTOOLS)
+LFLAGS?= -L$(HTSTMP)
 
 # define any libraries to link into executable:
 #   if I want to link in libraries (libx.so or libx.a) I use the -llibname
 #   option, something like (this will link in libmylib.so and libm.so:
-LIBS= -lbam -lpthread -lz
+LIBS=-lhts -lpthread -lz
 
 # define the C source files
 SRCS=./src/bam_access.c
@@ -35,6 +40,8 @@ TESTS=$(patsubst %.c,%,$(TEST_SRC))
 # Below we are replacing the suffix .c of all words in the macro SRCS
 # with the .o suffix
 #
+MD := mkdir
+
 OBJS = $(SRCS:.c=.o)
 
 #Build target executable
@@ -46,19 +53,18 @@ COUNTER_TARGET=./bin/alleleCounter
 # deleting dependencies appended to the file from 'make depend'
 #
 
-.PHONY: depend clean coverage test
+.PHONY: depend clean coverage test make_htslib_tmp remove_htslib_tmp
 
 .NOTPARALLEL: test
 
-all: $(COUNTER_TARGET) test
+all: clean make_htslib_tmp $(COUNTER_TARGET) test remove_htslib_tmp
 	@echo  Binaries have been compiled.
-
 
 $(COUNTER_TARGET): $(OBJS)
 	$(CC) $(CFLAGS) $(INCLUDES) -o $(COUNTER_TARGET) $(OBJS) $(LFLAGS) $(LIBS) ./src/alleleCounter.c
 
 #Unit Tests
-test: $(CAVEMAN_TARGET)
+test: $(COUNTER_TARGET)
 test: CFLAGS += $(INCLUDES) $(OBJS) $(LFLAGS) $(LIBS)
 test: $(TESTS)
 	sh ./tests/runtests.sh
@@ -66,6 +72,15 @@ test: $(TESTS)
 #Unit tests with coverage
 coverage: CFLAGS += --coverage
 coverage: test
+
+make_htslib_tmp:
+	$(MD) $(HTSTMP)
+	#Do some magic to ensure we compile ALLELECOUNT with the static libhts.a rather than libhts.so
+	ln -s $(HTSLOC)/libhts.a $(HTSTMP)/libhts.a
+
+remove_htslib_tmp:
+	@echo remove tmp hts location
+	-rm -rf $(HTSTMP)
 
 valgrind:
 	VALGRIND="valgrind --log-file=/tmp/valgrind-%p.log" $(MAKE)
