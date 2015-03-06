@@ -23,7 +23,7 @@
 #define _bam_access_h
 
 #include <ctype.h>
-#include <htslib/hts.h>
+#include <stdlib.h>
 #include <htslib/sam.h>
 
 typedef struct loci_stats{

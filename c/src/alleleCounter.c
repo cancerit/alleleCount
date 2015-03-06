@@ -45,20 +45,22 @@ int check_exist(char *fname){
 }
 
 void alleleCounter_print_usage (int exit_code){
-	printf ("Usage: alleleCounter -l loci_file.txt -b sample.bam -o output.txt [-m int] \n\n");
-  printf (" -l --loci-file [file]           Path to loci file.\n");
-  printf (" -b --hts-file [file]            Path to sample HTS file.\n");
-  printf (" -r --ref-file [file]            Path to reference fasta file.\n");
-  printf (" -o --output-file [file]         Path write output file.\n\n");
+	printf ("Usage: alleleCounter -l loci_file.txt -b sample.bam -o output.txt [-m int] [-r ref.fa.fai]\n\n");
+  printf (" -l  --loci-file [file]           Path to loci file.\n");
+  printf (" -b  --hts-file [file]            Path to sample HTS file.\n");
+  printf (" -o  --output-file [file]         Path write output file.\n\n");
 
 	printf ("Optional\n");
+	printf (" -r  --ref-file [file]           Path to reference fasta index file.\n");
+	printf ("                                 NB. If cram format is supplied via -b and the reference listed in the cram header can't be found alleleCounter may fail to work correctly.\n");
 	printf (" -m  --min-base-qual [int]       Minimum base quality [Default: %d].\n",min_base_q);
 	printf (" -q  --min-map-qual [int]        Minimum mapping quality [Default: %d].\n",min_map_q);
-	printf (" -h	--help                      Display this usage information.\n\n");
+	printf (" -h  --help                      Display this usage information.\n\n");
   exit(exit_code);
 }
 
 void alleleCounter_setup_options(int argc, char *argv[]){
+  ref_file = NULL;
 	const struct option long_opts[] =
 	{
              	{"loci-file", required_argument, 0, 'l'},
@@ -129,9 +131,11 @@ void alleleCounter_setup_options(int argc, char *argv[]){
    	printf("HTS file %s does not appear to exist.\n",hts_file);
    	alleleCounter_print_usage(1);
    }
-   if(check_exist(ref_file) != 1){
-   	printf("Reference file %s does not appear to exist.\n",ref_file);
-   	alleleCounter_print_usage(1);
+   if(ref_file){
+    if( check_exist(ref_file) != 1){
+   	  printf("Reference file provided %s does not appear to exist.\n",ref_file);
+   	  alleleCounter_print_usage(1);
+   	 }
    }
    return;
 }
