@@ -45,6 +45,7 @@ int check_exist(char *fname){
 }
 
 void alleleCounter_print_usage (int exit_code){
+
 	printf ("Usage: alleleCounter -l loci_file.txt -b sample.bam -o output.txt [-m int] [-r ref.fa.fai]\n\n");
   printf (" -l  --loci-file [file]           Path to loci file.\n");
   printf (" -b  --hts-file [file]            Path to sample HTS file.\n");

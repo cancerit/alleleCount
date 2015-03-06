@@ -4,9 +4,9 @@
       "unknown"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "ExtUtils::MakeMaker version 6.68, CPAN::Meta::Converter version 2.131560",
+   "generated_by" : "ExtUtils::MakeMaker version 6.68, CPAN::Meta::Converter version 2.142690",
    "license" : [
-      "unknown"
+      "agpl_3"
    ],
    "meta-spec" : {
       "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
@@ -45,5 +45,5 @@
       }
    },
    "release_status" : "stable",
-   "version" : "v1.2.1"
+   "version" : "v2.0.0"
 }

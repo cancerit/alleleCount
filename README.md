@@ -39,14 +39,19 @@ specifically AscatNGS and Battenburg.
 All that this contains is a perl program to calculate the allele fraction for locations provided in
 an input file.
 
+The C version of bam_stats supports both BAM and CRAM input.
+
 ---
 
 ###Dependencies/Install
 Some of the code included in this package has dependencies on several C packages:
 
-* [samtools](https://github.com/samtools), via [Bio::DB::Sam](http://search.cpan.org/~lds/Bio-SamTools/)
+* [samtools v0.1.20](https://github.com/samtools), via [Bio::DB::Sam](http://search.cpan.org/~lds/Bio-SamTools/)
+* [htslib](https://github.com/samtools/htslib)
 
 And various utility perl modules.
+
+(samtools is only required for legacy perl version of bam_stats.pl and will be removed at a later date).
 
 Once complete please run:
 
