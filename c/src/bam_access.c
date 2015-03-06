@@ -43,7 +43,6 @@ typedef struct {
 
 int bam_access_openhts(char *hts_file, char *ref_file){
 	assert(hts_file != NULL);
-	assert(ref_file != NULL);
 	//Assign memory for the file name etc holding struct
 	fholder = malloc(sizeof(file_holder));
 	check_mem(fholder);
@@ -54,7 +53,12 @@ int bam_access_openhts(char *hts_file, char *ref_file){
 	check(fholder->in != 0,"HTS file %s failed to open.",hts_file);
   fholder->idx = sam_index_load(fholder->in,hts_file);
 	check(fholder->idx != 0,"HTS index file %s failed to open.",hts_file);
-  hts_set_fai_filename(fholder->in, ref_file);
+	if(ref_file){
+	  hts_set_fai_filename(fholder->in, ref_file);
+	}else{
+
+	  if(fholder->in->format.format == cram) log_warn("No reference file provided for a cram input file, if the reference described in the cram header can't be located this script may fail.");
+	}
   //Check for generic header read method.
   fholder->head = sam_hdr_read(fholder->in);
 	return 0;
