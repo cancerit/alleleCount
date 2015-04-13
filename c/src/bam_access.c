@@ -36,6 +36,7 @@ int include_dup = 0;
 int include_se = 0;
 int min_base_qual = 20;
 int min_map_qual = 35;
+int maxitercnt = 1000000000; //Overrride internal maxcnt for iterator!
 
 typedef struct {
 
@@ -110,13 +111,14 @@ loci_stats *bam_access_get_position_base_counts(char *chr, int posn){
 	stats->base_counts[3] = 0;
 	fholder->stats = stats;
 
-	region = malloc(sizeof(chr)+sizeof(":")+sizeof("-")+(sizeof(char)*((no_of_digits(posn)*2)+1)));
+	region = malloc((sizeof(char *) * (strlen(chr)+1))+sizeof(":")+sizeof("-")+(sizeof(char)*((no_of_digits(posn)*2)+1)));
 	sprintf(region,"%s:%d-%d",chr,posn,posn);
 	fholder->beg = posn;
 	fholder->end = posn;
 
   // initialize pileup
 	buf = bam_plp_init(pileup_func, (void *)fholder);
+	bam_plp_set_maxcnt(buf,maxitercnt);
 
   /*
   sam_fetch(fholder->in, fholder->idx, ref, fholder->beg, fholder->end, buf, fetch_algo_func);
