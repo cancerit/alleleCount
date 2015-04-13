@@ -1,5 +1,7 @@
+VERSION=2.1.0
+
 #Compiler
-CC = gcc -O3
+CC = gcc -O3 -DALLELECOUNTER_VERSION='"$(VERSION)"'
 
 #compiler flags
 # -g adds debug info to the executable file
