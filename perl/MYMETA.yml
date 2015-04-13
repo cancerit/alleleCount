@@ -27,4 +27,4 @@ requires:
   Pod::Coverage: '0.23'
   Test::Fatal: '0.013'
   Try::Tiny: '0.19'
-version: v2.0.1
+version: v2.1.0
