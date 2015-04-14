@@ -146,6 +146,7 @@ else
   if [ ! -e htslib ]; then
     get_distro "htslib" $SOURCE_HTSLIB
   fi
+  patch htslib/cram/cram_index.c < $INIT_DIR/patches/htslibcramindex.diff
   make -C htslib -j$CPU
   touch $SETUP_DIR/htslib.success
   )>>$INIT_DIR/setup.log 2>&1

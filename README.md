@@ -69,9 +69,10 @@ most are listed in `INSTALL`.
 
 ####Cutting the release
 1. Update `lib/Sanger/CGP/AlleleCount.pm` to the correct version (adding rc/beta to end if applicable).
-2. Update `Changes` to show major items.
-3. Run `./prerelease.sh`
-4. Check all tests and coverage reports are acceptable.
-5. Commit the updated docs tree and updated module/version.
-6. Push commits.
-7. Use the GitHub tools to draft a release.
+2. Update `c/Makefile` to contain the correct version.
+3. Update `Changes` to show major items.
+4. Run `./prerelease.sh`
+5. Check all tests and coverage reports are acceptable.
+6. Commit the updated docs tree and updated module/version.
+7. Push commits.
+8. Use the GitHub tools to draft a release.

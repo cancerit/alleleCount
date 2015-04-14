@@ -56,7 +56,13 @@ void alleleCounter_print_usage (int exit_code){
 	printf ("                                 NB. If cram format is supplied via -b and the reference listed in the cram header can't be found alleleCounter may fail to work correctly.\n");
 	printf (" -m  --min-base-qual [int]       Minimum base quality [Default: %d].\n",min_base_q);
 	printf (" -q  --min-map-qual [int]        Minimum mapping quality [Default: %d].\n",min_map_q);
+	printf (" -v  --version                   Display version number.\n");
 	printf (" -h  --help                      Display this usage information.\n\n");
+  exit(exit_code);
+}
+
+void alleleCounter_print_version (int exit_code){
+  printf ("%s\n",ALLELECOUNTER_VERSION);
   exit(exit_code);
 }
 
@@ -71,6 +77,7 @@ void alleleCounter_setup_options(int argc, char *argv[]){
              	{"min-base-qual", required_argument, 0, 'm'},
 							{"min-map-qual", required_argument, 0, 'q'},
 							{"is-snp6", required_argument, 0, 's'},
+							{"version", no_argument, 0, 'v'},
              	{"help", no_argument, 0, 'h'},
              	{ NULL, 0, NULL, 0}
    }; //End of declaring opts
@@ -79,11 +86,15 @@ void alleleCounter_setup_options(int argc, char *argv[]){
    int iarg = 0;
 
    //Iterate through options
-   while((iarg = getopt_long(argc, argv, "l:b:m:o:q:r:hs", long_opts, &index)) != -1){
+   while((iarg = getopt_long(argc, argv, "l:b:m:o:q:r:hsv", long_opts, &index)) != -1){
    	switch(iarg){
-   		case 'h':
+   		  case 'h':
          	alleleCounter_print_usage(0);
          	break;
+
+        case 'v':
+          alleleCounter_print_version(0);
+          break;
 
       	case 'l':
       		loci_file = optarg;
