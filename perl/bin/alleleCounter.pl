@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 ##########LICENCE##########
-# Copyright (c) 2014 Genome Research Ltd.
+# Copyright (c) 2014,2015 Genome Research Ltd.
 #
 # Author:  CancerIT <cgpit@sanger.ac.uk>
 #
@@ -71,6 +71,7 @@ sub option_builder {
 		'o|output=s' => \$opts{'o'},
 		'l|locus=s' => \$opts{'l'},
 		'm|minqual=n' => \$opts{'m'},
+		'q|mapqual=n' => \$opts{'q'},
     'v|version'   => \$opts{'v'},
 	);
 
