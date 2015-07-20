@@ -1,0 +1,22 @@
+Updating the current gh-pages site to the branded site
+
+Clone the branded repository from <>
+In your git repo, checkout the gh-pages branch using
+  git checkout gh-pages
+Or if you don't have that branch locally
+  git checkout -b gh-pages origin/gh-pages
+Then clean up the contents of the branch by using
+  git rm -r *
+Then copy the content of the branded gh-pages repo to your gh-pages branch then add the files with
+  git add --all .
+Then push to the remote with
+  git push
+
+
+Creating a new gh-pages branch
+
+Clone the branded repository from <>
+Create the new gh-pages branch in your repo and switch to it
+Copy the contents of the branded repo to yours
+git add .
+git push
