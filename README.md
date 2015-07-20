@@ -4,10 +4,22 @@ alleleCount
 The alleleCount package primarily exists to prevent code duplication between some other projects,
 specifically AscatNGS and Battenburg.
 
-All that this contains is a perl program to calculate the allele fraction for locations provided in
-an input file.
+The project contains 2 equivalent implementations of allele counting code in perl and C for BAM processing.
 
-The C version of bam_stats supports both BAM and CRAM input.
+The C version of alleleCounter additionally supports CRAM input.
+
+## Loci File
+
+The input for both tools is a simple tab formatted file of chromosomea and 1-based positions, e.g.
+
+```
+<CHR><TAB><POS1>
+<CHR><TAB><POS2>
+<CHR><TAB><POS3>
+...
+```
+
+The file doesn't need to be in any particular order (although disk reads are likely to be more efficient when sorted).
 
 ---
 
