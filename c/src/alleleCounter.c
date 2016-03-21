@@ -33,6 +33,7 @@ static char *hts_file;
 static char *loci_file;
 static char *out_file;
 static char *ref_file;
+static char *contig = NULL;
 static int snp6 = 0;
 
 int check_exist(char *fname){
@@ -56,6 +57,7 @@ void alleleCounter_print_usage (int exit_code){
 	printf ("                                 NB. If cram format is supplied via -b and the reference listed in the cram header can't be found alleleCounter may fail to work correctly.\n");
 	printf (" -m  --min-base-qual [int]       Minimum base quality [Default: %d].\n",min_base_q);
 	printf (" -q  --min-map-qual [int]        Minimum mapping quality [Default: %d].\n",min_map_q);
+	printf (" -c  --contig [string]           Limit calling to named contig.\n");
 	printf (" -v  --version                   Display version number.\n");
 	printf (" -h  --help                      Display this usage information.\n\n");
   exit(exit_code);
@@ -77,6 +79,7 @@ void alleleCounter_setup_options(int argc, char *argv[]){
              	{"min-base-qual", required_argument, 0, 'm'},
 							{"min-map-qual", required_argument, 0, 'q'},
 							{"is-snp6", required_argument, 0, 's'},
+							{"contig", required_argument, 0, 'c'},
 							{"version", no_argument, 0, 'v'},
              	{"help", no_argument, 0, 'h'},
              	{ NULL, 0, NULL, 0}
@@ -86,7 +89,7 @@ void alleleCounter_setup_options(int argc, char *argv[]){
    int iarg = 0;
 
    //Iterate through options
-   while((iarg = getopt_long(argc, argv, "l:b:m:o:q:r:hsv", long_opts, &index)) != -1){
+   while((iarg = getopt_long(argc, argv, "l:b:m:o:q:r:c:hsv", long_opts, &index)) != -1){
    	switch(iarg){
    		  case 'h':
          	alleleCounter_print_usage(0);
@@ -123,6 +126,10 @@ void alleleCounter_setup_options(int argc, char *argv[]){
       	case 's':
       		snp6 = 1;
       		break;
+
+      	case 'c':
+      	  contig = optarg;
+          break;
 
 				case '?':
           alleleCounter_print_usage (1);
@@ -278,6 +285,7 @@ int main(int argc, char *argv[]){
 		i++;
 		int check = get_position_info_from_file(line,chr,&pos,snp6,&allele_A,&allele_B,i);
 		check(check==0,"Error trying to fetch position from file.");
+		if(contig != NULL && strcmp(contig,chr) != 0) continue;
 
 		loci_stats *stats = bam_access_get_position_base_counts(chr,pos);
 		int depth = stats->base_counts[0]+stats->base_counts[1]+stats->base_counts[2]+stats->base_counts[3];
