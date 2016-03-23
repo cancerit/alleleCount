@@ -53,7 +53,7 @@ int bam_access_openhts(char *hts_file, char *ref_file){
 	fholder->in = hts_open(hts_file, "r");
 	check(fholder->in != 0,"HTS file %s failed to open.",hts_file);
   fholder->idx = sam_index_load(fholder->in,hts_file);
-	check(fholder->idx != 0,"HTS index file %s failed to open.",hts_file);
+	check(fholder->idx != 0,"HTS index file for %s failed to open.",hts_file);
 	if(ref_file){
 	  hts_set_fai_filename(fholder->in, ref_file);
 	}else{
@@ -64,14 +64,15 @@ int bam_access_openhts(char *hts_file, char *ref_file){
   fholder->head = sam_hdr_read(fholder->in);
 	return 0;
 error:
+  if(fholder->idx) hts_idx_destroy(fholder->idx);
 	if(fholder->in) hts_close(fholder->in);
 	if(fholder) free(fholder);
 	return -1;
 }
 
 void bam_access_closehts(){
-	if(fholder->idx) hts_idx_destroy(fholder->idx);
-	if(fholder->in) hts_close(fholder->in);
+	if(fholder && fholder->idx) hts_idx_destroy(fholder->idx);
+	if(fholder && fholder->in) hts_close(fholder->in);
 	if(fholder) free(fholder);
 	return;
 }
