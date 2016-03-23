@@ -1,5 +1,5 @@
-### Next release
-* Added contig filter
+### 2.2.0
+* Added contig filter commandline option
 
 ### 2.1.0
 * Added version info to makefile and option to display to alleleCount C code.

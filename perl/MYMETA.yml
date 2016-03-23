@@ -27,5 +27,5 @@ requires:
   Pod::Coverage: '0.23'
   Test::Fatal: '0.013'
   Try::Tiny: '0.19'
-version: v2.1.2
+version: v2.2.0
 x_serialization_backend: 'CPAN::Meta::YAML version 0.018'
