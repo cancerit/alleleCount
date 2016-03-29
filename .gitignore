@@ -9,6 +9,8 @@
 /perl/pm_to_blib
 /perl/Makefile
 /perl/perltidy.LOG
+/perl/MYMETA.json
+/perl/MYMETA.yml
 /setup.log
 /c/bin/*
 c/src/*.o
