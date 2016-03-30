@@ -1,6 +1,5 @@
 bin/alleleCounter.pl
 bin/alleleCounter_version.pl
-bin/cpanm
 docs.tar.gz
 lib/Sanger/CGP/AlleleCount.pm
 lib/Sanger/CGP/AlleleCount/Genotype.pm
@@ -10,3 +9,4 @@ MANIFEST			This list of files
 MANIFEST.SKIP
 t/1_pm_compile.t
 t/2_pl_compile.t
+t/genotype.t

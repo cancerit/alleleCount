@@ -52,10 +52,10 @@ sub run {
   open my $FH, '>', $options->{'o'} or croak 'Failed to create '.$options->{'o'};
   my $geno_ob = Sanger::CGP::AlleleCount::Genotype->new();
   if($options->{'l'}) {
-    $geno_ob->get_full_loci_profile($options->{'b'}, $FH, $options->{'l'}, $options->{'m'}, $options->{'q'});
+    $geno_ob->get_full_loci_profile($options->{'b'}, $FH, $options->{'l'}, $options->{'m'}, $options->{'q'}, $options->{'r'});
   }
   else {
-    $geno_ob->get_full_snp6_profile($options->{'b'}, $FH, $options->{'m'}, $options->{'q'});
+    $geno_ob->get_full_snp6_profile($options->{'b'}, $FH, $options->{'m'}, $options->{'q'}, $options->{'r'});
   }
   close $FH;
 }
@@ -70,6 +70,7 @@ sub option_builder {
 		'b|bam=s' => \$opts{'b'},
 		'o|output=s' => \$opts{'o'},
 		'l|locus=s' => \$opts{'l'},
+		'r|ref=s' => \$opts{'r'},
 		'm|minqual=n' => \$opts{'m'},
 		'q|mapqual=n' => \$opts{'q'},
     'v|version'   => \$opts{'v'},
@@ -99,7 +100,7 @@ alleleCounts.pl
 
   Required:
 
-    -bam      -b      BWA bam file (expects co-located index)
+    -bam      -b      BAM/CRAM file (expects co-located index)
     -output   -o      Output file
     -minqual  -m      Minimum base quality to include (integer) [30]
     -mapqual  -q      Minimum mapping quality of read (integer) [35]
@@ -107,6 +108,7 @@ alleleCounts.pl
                       - output is different, counts for each residue
 
   Optional:
+    -ref      -r      genome.fa, required for CRAM (with colocated .fai)
     -help     -h      This message
     -version  -v      Version number
 

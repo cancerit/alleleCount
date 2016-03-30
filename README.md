@@ -4,13 +4,11 @@ alleleCount
 The alleleCount package primarily exists to prevent code duplication between some other projects,
 specifically AscatNGS and Battenburg.
 
-The project contains 2 equivalent implementations of allele counting code in perl and C for BAM processing.
-
-The C version of alleleCounter additionally supports CRAM input.
+The project contains 2 equivalent implementations of allele counting code in perl and C for BAM/CRAM processing.
 
 ## Loci File
 
-The input for both tools is a simple tab formatted file of chromosomea and 1-based positions, e.g.
+The input for both tools is a simple tab formatted file of chromosome and 1-based positions, e.g.
 
 ```
 <CHR><TAB><POS1>
@@ -24,21 +22,20 @@ The file doesn't need to be in any particular order (although disk reads are lik
 ---
 
 ###Dependencies/Install
-Some of the code included in this package has dependencies on several C packages:
 
-* [samtools v0.1.20](https://github.com/samtools), via [Bio::DB::Sam](http://search.cpan.org/~lds/Bio-SamTools/)
+Some of the code included in this package has dependencies:
+
+* [samtools v1.2+](https://github.com/samtools/samtools)
 * [htslib](https://github.com/samtools/htslib)
+* [Bio::DB::HTS](http://search.cpan.org/~rishidev/Bio-DB-HTS/)
 
 And various utility perl modules.
 
-(samtools is only required for legacy perl version of bam_stats.pl and will be removed at a later date).
-
-Once complete please run:
+These are all installed for you by running:
 
     ./setup.sh /some/install/location
 
-Please be aware that this expects basic C compilation libraries and tools to be available,
-most are listed in `INSTALL`.
+Please be aware that this expects basic C compilation libraries and tools to be available.
 
 ---
 
@@ -48,19 +45,18 @@ most are listed in `INSTALL`.
 * Pull a clean version of the repo and use this for the following steps.
 
 ####Cutting the release
-1. Update `lib/Sanger/CGP/AlleleCount.pm` to the correct version (adding rc/beta to end if applicable).
-2. Update `c/Makefile` to contain the correct version.
-3. Update `Changes` to show major items.
-4. Run `./prerelease.sh`
-5. Check all tests and coverage reports are acceptable.
-6. Commit the updated docs tree and updated module/version.
-7. Push commits.
-8. Use the GitHub tools to draft a release.
+1. Update `lib/Sanger/CGP/AlleleCount.pm` to the correct version.
+2. Update `CHANGES.md` to show major items.
+3. Run `./prerelease.sh`
+4. Check all tests and coverage reports are acceptable.
+5. Commit the updated docs tree and updated module/version.
+6. Push commits.
+7. Use the GitHub tools to draft a release.
 
 LICENCE
 =======
 
-Copyright (c) 2014,2015 Genome Research Ltd.
+Copyright (c) 2014-2016 Genome Research Ltd.
 
 Author: CancerIT <cgpit@sanger.ac.uk>
 

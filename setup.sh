@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ##########LICENCE##########
-# Copyright (c) 2014,2015 Genome Research Ltd.
+# Copyright (c) 2014-2016 Genome Research Ltd.
 #
 # Author: CancerIT <cgpit@sanger.ac.uk>
 #
@@ -22,8 +22,9 @@
 ##########LICENCE##########
 
 
-SOURCE_SAMTOOLS="https://github.com/samtools/samtools/archive/0.1.20.tar.gz"
-SOURCE_HTSLIB="https://github.com/samtools/htslib/archive/1.2.tar.gz"
+SOURCE_SAMTOOLS="https://github.com/samtools/samtools/releases/download/1.3/samtools-1.3.tar.bz2"
+SOURCE_HTSLIB="https://github.com/samtools/htslib/archive/1.3.tar.gz"
+BIODBHTS_INSTALL="https://raw.githubusercontent.com/Ensembl/Bio-HTS/master/INSTALL.pl"
 
 done_message () {
     if [ $? -eq 0 ]; then
@@ -40,24 +41,34 @@ done_message () {
 
 get_distro () {
   EXT=""
-  DECOMP="gunzip -f"
+  DECOMP=""
   if [[ $2 == *.tar.bz2* ]] ; then
     EXT="tar.bz2"
-    DECOMP="bzip2 -fd"
+    DECOMP="-j"
   elif [[ $2 == *.tar.gz* ]] ; then
     EXT="tar.gz"
+    DECOMP="-z"
   else
     echo "I don't understand the file type for $1"
     exit 1
   fi
+
   if hash curl 2>/dev/null; then
     curl -sS -o $1.$EXT -L $2
   else
     wget -nv -O $1.$EXT $2
   fi
   mkdir -p $1
-  `$DECOMP $1.$EXT`
-  tar --strip-components 1 -C $1 -xf $1.tar
+  tar --strip-components 1 -C $1 $DECOMP -xf $1.$EXT
+}
+
+get_file () {
+# output, source
+  if hash curl 2>/dev/null; then
+    curl -sS -o $1 -L $2
+  else
+    wget -nv -O $1 $2
+  fi
 }
 
 if [ "$#" -ne "1" ] ; then
@@ -96,6 +107,8 @@ echo > $INIT_DIR/setup.log
     echo; echo
 ) >>$INIT_DIR/setup.log 2>&1
 
+set -e
+
 # cleanup inst_path
 mkdir -p $INST_PATH/bin
 cd $INST_PATH
@@ -104,14 +117,26 @@ cd $INIT_DIR
 
 # make sure that build is self contained
 unset PERL5LIB
-ARCHNAME=`perl -e 'use Config; print $Config{archname};'`
 PERLROOT=$INST_PATH/lib/perl5
-PERLARCH=$PERLROOT/$ARCHNAME
-export PERL5LIB="$PERLROOT:$PERLARCH"
+
+# allows user to knowingly specify other PERL5LIB areas.
+if [ -z ${CGP_PERLLIBS+x} ]; then
+  export PERL5LIB="$PERLROOT"
+else
+  export PERL5LIB="$PERLROOT:$CGP_PERLLIBS"
+fi
+
+export PATH=$INST_PATH/bin:$PATH
 
 #create a location to build dependencies
 SETUP_DIR=$INIT_DIR/install_tmp
 mkdir -p $SETUP_DIR
+
+## grab cpanm and stick in workspace, then do a self upgrade into bin:
+get_file $SETUP_DIR/cpanm https://cpanmin.us/
+perl $SETUP_DIR/cpanm -l $INST_PATH App::cpanminus
+CPANM=`which cpanm`
+echo $CPANM
 
 cd $SETUP_DIR
 
@@ -119,18 +144,13 @@ echo -n "Building samtools ..."
 if [ -e "$SETUP_DIR/samtools.success" ]; then
   echo -n " previously installed ...";
 else
-  cd $SETUP_DIR
-  (
-    set -x
-    if [ ! -e $SETUP_DIR/samtools ]; then
-      get_distro "samtools" $SOURCE_SAMTOOLS
-      perl -i -pe 's/^CFLAGS=\s*/CFLAGS=-fPIC / unless /\b-fPIC\b/' samtools/Makefile
-    fi
-    make -C samtools -j$CPU
-    set +x
-    cp $SETUP_DIR/samtools/samtools $INST_PATH/bin/.
-    touch $SETUP_DIR/samtools.success
-  )>>$INIT_DIR/setup.log 2>&1
+  cd $SETUP_DIR &&
+  get_distro "samtools" $SOURCE_SAMTOOLS &&
+  cd samtools &&
+  ./configure --enable-plugins --enable-libcurl --prefix=$INST_PATH &&
+  make all all-htslib &&
+  make install install-htslib &&
+  touch $SETUP_DIR/samtools.success
 fi
 done_message "" "Failed to build samtools."
 
@@ -140,16 +160,10 @@ echo -n "Building htslib ..."
 if [ -e $SETUP_DIR/htslib.success ]; then
   echo -n " previously installed ...";
 else
-  cd $SETUP_DIR
-  (
-  set -xe
-  if [ ! -e htslib ]; then
-    get_distro "htslib" $SOURCE_HTSLIB
-  fi
-  patch htslib/cram/cram_index.c < $INIT_DIR/patches/htslibcramindex.diff
-  make -C htslib -j$CPU
+  cd $SETUP_DIR &&
+  get_distro "htslib" $SOURCE_HTSLIB &&
+  make -C htslib -j$CPU &&
   touch $SETUP_DIR/htslib.success
-  )>>$INIT_DIR/setup.log 2>&1
 fi
 done_message "" "Failed to build htslib."
 
@@ -159,17 +173,27 @@ echo -n "Building alleleCounter ..."
 if [ -e "$SETUP_DIR/alleleCounter.success" ]; then
   echo -n " previously installed ...";
 else
-  cd $INIT_DIR
-  (
-    set -xe
-    mkdir -p $INIT_DIR/c/bin
-    make -C c -j$CPU
-    cp $INIT_DIR/c/bin/alleleCounter $INST_PATH/bin/.
-    make -C c clean
-    touch $SETUP_DIR/alleleCounter.success
-  )>>$INIT_DIR/setup.log 2>&1
+  cd $INIT_DIR &&
+  mkdir -p $INIT_DIR/c/bin &&
+  make -C c -j$CPU &&
+  cp $INIT_DIR/c/bin/alleleCounter $INST_PATH/bin/. &&
+  make -C c clean &&
+  touch $SETUP_DIR/alleleCounter.success
 fi
 done_message "" "Failed to build alleleCounter."
+
+echo -n "Building Bio::DB::HTS ..."
+if [ -e $SETUP_DIR/biohts.success ]; then
+  echo -n " previously installed ...";
+else
+  cd $SETUP_DIR &&
+  $CPANM --mirror http://cpan.metacpan.org --notest -l $INST_PATH Module::Build Bio::Perl &&
+  # now Bio::DB::HTS
+  get_file "INSTALL.pl" $BIODBHTS_INSTALL &&
+  perl -I $PERL5LIB INSTALL.pl --prefix $INST_PATH --static &&
+  rm -f BioDbHTS_INSTALL.pl &&
+  touch $SETUP_DIR/biohts.success
+fi
 
 
 #add bin path for install tests
@@ -182,21 +206,15 @@ if ! ( perl -MExtUtils::MakeMaker -e 1 >/dev/null 2>&1); then
     echo
     echo "WARNING: Your Perl installation does not seem to include a complete set of core modules.  Attempting to cope with this, but if installation fails please make sure that at least ExtUtils::MakeMaker is installed.  For most users, the best way to do this is to use your system's package manager: apt, yum, fink, homebrew, or similar."
 fi
-(
-  set -x
-  $INIT_DIR/perl/bin/cpanm -v --mirror http://cpan.metacpan.org --notest -l $INST_PATH/ --installdeps $INIT_DIR/perl/. < /dev/null
-  set +x
-) >>$INIT_DIR/setup.log 2>&1
+$CPANM --mirror http://cpan.metacpan.org --notest -l $INST_PATH/ --installdeps $INIT_DIR/perl/. < /dev/null
 done_message "" "Failed during installation of core dependencies."
 
 echo -n "Installing alleleCount ..."
-(
-  cd $INIT_DIR/perl
-  perl Makefile.PL INSTALL_BASE=$INST_PATH
-  make
-  make test
-  make install
-) >>$INIT_DIR/setup.log 2>&1
+cd $INIT_DIR/perl &&
+perl Makefile.PL INSTALL_BASE=$INST_PATH &&
+make &&
+make test &&
+make install
 done_message "" "alleleCount install failed."
 
 # cleanup all junk
