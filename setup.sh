@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ##########LICENCE##########
-# Copyright (c) 2014,2015 Genome Research Ltd.
+# Copyright (c) 2014-2016 Genome Research Ltd.
 #
 # Author: CancerIT <cgpit@sanger.ac.uk>
 #
@@ -41,24 +41,25 @@ done_message () {
 
 get_distro () {
   EXT=""
-  DECOMP="gunzip -f"
+  DECOMP=""
   if [[ $2 == *.tar.bz2* ]] ; then
     EXT="tar.bz2"
-    DECOMP="bzip2 -fd"
+    DECOMP="-j"
   elif [[ $2 == *.tar.gz* ]] ; then
     EXT="tar.gz"
+    DECOMP="-z"
   else
     echo "I don't understand the file type for $1"
     exit 1
   fi
+
   if hash curl 2>/dev/null; then
     curl -sS -o $1.$EXT -L $2
   else
     wget -nv -O $1.$EXT $2
   fi
   mkdir -p $1
-  `$DECOMP $1.$EXT`
-  tar --strip-components 1 -C $1 -xf $1.tar
+  tar --strip-components 1 -C $1 $DECOMP -xf $1.$EXT
 }
 
 get_file () {
@@ -116,9 +117,16 @@ cd $INIT_DIR
 
 # make sure that build is self contained
 unset PERL5LIB
-ARCHNAME=`perl -e 'use Config; print $Config{archname};'`
 PERLROOT=$INST_PATH/lib/perl5
-export PERL5LIB="$PERLROOT"
+
+# allows user to knowingly specify other PERL5LIB areas.
+if [ -z ${CGP_PERLLIBS+x} ]; then
+  export PERL5LIB="$PERLROOT"
+else
+  export PERL5LIB="$PERLROOT:$CGP_PERLLIBS"
+fi
+
+export PATH=$INST_PATH/bin:$PATH
 
 #create a location to build dependencies
 SETUP_DIR=$INIT_DIR/install_tmp
@@ -129,7 +137,6 @@ get_file $SETUP_DIR/cpanm https://cpanmin.us/
 perl $SETUP_DIR/cpanm -l $INST_PATH App::cpanminus
 CPANM=`which cpanm`
 echo $CPANM
-
 
 cd $SETUP_DIR
 
