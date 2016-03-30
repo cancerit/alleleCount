@@ -1,4 +1,4 @@
-VERSION=2.2.0
+VERSION=$(shell perl -I../perl/lib -MSanger::CGP::AlleleCount -e 'print Sanger::CGP::AlleleCount->VERSION;')
 
 #Compiler
 CC = gcc -O3 -DALLELECOUNTER_VERSION='"$(VERSION)"'
