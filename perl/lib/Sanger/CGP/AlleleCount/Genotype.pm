@@ -30,8 +30,8 @@ use warnings FATAL => 'all';
 use Sanger::CGP::AlleleCount;
 use Sanger::CGP::AlleleCount::PileupData;
 
-use Bio::DB::Sam;
-use Bio::DB::Bam::AlignWrapper;
+use Bio::DB::HTS;
+use Bio::DB::HTS::AlignWrapper;
 
 use Const::Fast qw(const);
 
@@ -63,10 +63,10 @@ sub new {
   Uses all snps defined in file used by ngs_cn (format slightly different)
 =cut
 sub get_full_snp6_profile {
-  my ($self, $bam_file, $fh, $min_pbq, $min_mapq) = @_;
+  my ($self, $bam_file, $fh, $min_pbq, $min_mapq, $fasta) = @_;
   $g_pb_qual = $min_pbq || $MIN_PBQ;
   $g_map_qual = $min_mapq || $MIN_MAPQ;
-  my $sam = Bio::DB::Sam->new(-bam => $bam_file);
+  my $sam = Bio::DB::HTS->new(-bam => $bam_file, -fasta=> $fasta);
   $sam->max_pileup_cnt($MAX_PILEUP_DEPTH);
   $g_sam = $sam;
   my $snp6_file = $self->ngs_cn_snps({'species'=>'HUMAN','build'=>37});
@@ -91,10 +91,10 @@ sub get_full_snp6_profile {
   Uses all loci defined in specified file
 =cut
 sub get_full_loci_profile {
-  my ($self, $bam_file, $fh, $loci_file, $min_pbq, $min_mapq) = @_;
+  my ($self, $bam_file, $fh, $loci_file, $min_pbq, $min_mapq, $fasta) = @_;
   $g_pb_qual = $min_pbq || $MIN_PBQ;
   $g_map_qual = $min_mapq || $MIN_MAPQ;
-  my $sam = Bio::DB::Sam->new(-bam => $bam_file);
+  my $sam = Bio::DB::HTS->new(-bam => $bam_file, -fasta=> $fasta);
   $sam->max_pileup_cnt($MAX_PILEUP_DEPTH);
   $g_sam = $sam;
   my ($region, $chr, $pos, $allA, $allB);
