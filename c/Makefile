@@ -42,7 +42,7 @@ TESTS=$(patsubst %.c,%,$(TEST_SRC))
 # Below we are replacing the suffix .c of all words in the macro SRCS
 # with the .o suffix
 #
-MD := mkdir
+MD := mkdir -p
 
 OBJS = $(SRCS:.c=.o)
 
@@ -78,7 +78,7 @@ coverage: test
 make_htslib_tmp:
 	$(MD) $(HTSTMP)
 	#Do some magic to ensure we compile ALLELECOUNT with the static libhts.a rather than libhts.so
-	ln -s $(HTSLOC)/libhts.a $(HTSTMP)/libhts.a
+	ln -fs $(HTSLOC)/libhts.a $(HTSTMP)/libhts.a
 
 remove_htslib_tmp:
 	@echo remove tmp hts location
