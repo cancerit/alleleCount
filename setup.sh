@@ -154,8 +154,6 @@ else
 fi
 done_message "" "Failed to build samtools."
 
-export SAMTOOLS="$SETUP_DIR/samtools"
-
 echo -n "Building htslib ..."
 if [ -e $SETUP_DIR/htslib.success ]; then
   echo -n " previously installed ...";
@@ -187,17 +185,13 @@ if [ -e $SETUP_DIR/biohts.success ]; then
   echo -n " previously installed ...";
 else
   cd $SETUP_DIR &&
-  $CPANM --mirror http://cpan.metacpan.org --notest -l $INST_PATH Module::Build Bio::Perl &&
+  $CPANM --mirror http://cpan.metacpan.org --notest -l $INST_PATH Module::Build Bio::Root::Version &&
   # now Bio::DB::HTS
   get_file "INSTALL.pl" $BIODBHTS_INSTALL &&
   perl -I $PERL5LIB INSTALL.pl --prefix $INST_PATH --static &&
   rm -f BioDbHTS_INSTALL.pl &&
   touch $SETUP_DIR/biohts.success
 fi
-
-
-#add bin path for install tests
-export PATH="$INST_PATH/bin:$PATH"
 
 cd $INIT_DIR/perl
 
