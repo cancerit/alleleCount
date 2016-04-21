@@ -49,15 +49,27 @@ const my $MIN_PBQ => 30; # needs to correlate with Illumina bins
 
 sub run {
   my ($options) = @_;
-  open my $FH, '>', $options->{'o'} or croak 'Failed to create '.$options->{'o'};
-  my $geno_ob = Sanger::CGP::AlleleCount::Genotype->new();
-  if($options->{'l'}) {
-    $geno_ob->get_full_loci_profile($options->{'b'}, $FH, $options->{'l'}, $options->{'m'}, $options->{'q'}, $options->{'r'});
+  my $FH;
+  if(defined $options->{'o'}) {
+    open $FH, '>', $options->{'o'} or croak 'Failed to create '.$options->{'o'};
   }
   else {
-    $geno_ob->get_full_snp6_profile($options->{'b'}, $FH, $options->{'m'}, $options->{'q'}, $options->{'r'});
+    $FH = *STDOUT;
   }
-  close $FH;
+  my $geno_ob = Sanger::CGP::AlleleCount::Genotype->new();
+  $geno_ob->configure($options->{'b'}, $options->{'m'}, $options->{'q'}, $options->{'r'});
+  if($options->{'l'}) {
+    if($options->{'g'}) {
+      $geno_ob->gender_chk($FH, $options->{'l'});
+    }
+    else {
+      $geno_ob->get_full_loci_profile($FH, $options->{'l'});
+    }
+  }
+  else {
+    $geno_ob->get_full_snp6_profile($FH);
+  }
+  close $FH if(defined $options->{'o'});
 }
 
 sub option_builder {
@@ -70,6 +82,7 @@ sub option_builder {
 		'b|bam=s' => \$opts{'b'},
 		'o|output=s' => \$opts{'o'},
 		'l|locus=s' => \$opts{'l'},
+		'g|gender' => \$opts{'g'},
 		'r|ref=s' => \$opts{'r'},
 		'm|minqual=n' => \$opts{'m'},
 		'q|mapqual=n' => \$opts{'q'},
@@ -81,7 +94,7 @@ sub option_builder {
     print Sanger::CGP::AlleleCount->VERSION."\n";
     exit;
   }
-	pod2usage(1) if(!$opts{'o'} || !$opts{'b'});
+	pod2usage(1) if(!$opts{'b'});
 	$opts{'m'} = $MIN_PBQ unless(defined $opts{'m'});
 	$opts{'q'} = $MIN_MAPQ unless(defined $opts{'q'});
 
@@ -101,13 +114,14 @@ alleleCounts.pl
   Required:
 
     -bam      -b      BAM/CRAM file (expects co-located index)
-    -output   -o      Output file
+    -output   -o      Output file [STDOUT]
     -minqual  -m      Minimum base quality to include (integer) [30]
     -mapqual  -q      Minimum mapping quality of read (integer) [35]
-    -loci     -l      Alternate loci file (just needs chr pos)
-                      - output is different, counts for each residue
 
   Optional:
+    -loci     -l      Alternate loci file (just needs chr pos)
+                      - output is different, counts for each residue
+    -gender   -g      flag, presence indicates loci file to be treated as gender SNPs.
     -ref      -r      genome.fa, required for CRAM (with colocated .fai)
     -help     -h      This message
     -version  -v      Version number

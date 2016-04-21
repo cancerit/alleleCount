@@ -53,42 +53,48 @@ my $buffer = "";
 my $fh;
 
 open $fh, '>', \$buffer or die $!;
-is(1, $obj->get_full_loci_profile($bam, $fh, $loci), "Check execution of loci profile (BAM)");
+ok($obj->configure($bam), "Configure for loci profile (BAM)");
+is(1, $obj->get_full_loci_profile($fh, $loci), "Check execution of loci profile (BAM)");
 close $fh;
 is_deeply(tsv_to_data($buffer), \@DEFAULT_RESULT, "Expected result for defaults (BAM)");
 
 # test with default result for C version (-m=20 (bpq))
 $buffer = "";
 open $fh, '>', \$buffer or die $!;
-is(1, $obj->get_full_loci_profile($bam, $fh, $loci, 20), "Check execution of loci profile (BAM, pbq=20)");
+ok($obj->configure($bam, 20), "Configure for loci profile (BAM, pbq=20)");
+is(1, $obj->get_full_loci_profile($fh, $loci), "Check execution of loci profile (BAM, pbq=20)");
 close $fh;
 is_deeply(tsv_to_data($buffer), \@PBQ20_RESULT, "Expected result for defaults (BAM, pbq=20)");
 
 # test with mapq=1
 $buffer = "";
 open $fh, '>', \$buffer or die $!;
-is(1, $obj->get_full_loci_profile($bam, $fh, $loci, undef, 1), "Check execution of loci profile (BAM, mapq=1)");
+ok($obj->configure($bam, undef, 1), "Configure for loci profile (BAM, mapq=1)");
+is(1, $obj->get_full_loci_profile($fh, $loci), "Check execution of loci profile (BAM, mapq=1)");
 close $fh;
 is_deeply(tsv_to_data($buffer), \@MAPQ0_RESULT, "Expected result for defaults (BAM, mapq=1)");
 
 ### !!! The test cram file has the reference embedded so works fine without fasta !!! ###
 $buffer = "";
 open $fh, '>', \$buffer or die $!;
-is(1, $obj->get_full_loci_profile($cram, $fh, $loci), "Check execution of loci profile (CRAM)");
+ok($obj->configure($cram), "Configure for loci profile (CRAM)");
+is(1, $obj->get_full_loci_profile($fh, $loci), "Check execution of loci profile (CRAM)");
 close $fh;
 is_deeply(tsv_to_data($buffer), \@DEFAULT_RESULT, "Expected result for defaults (CRAM)");
 
 # test with default result for C version (-m=20 (bpq))
 $buffer = "";
 open $fh, '>', \$buffer or die $!;
-is(1, $obj->get_full_loci_profile($cram, $fh, $loci, 20), "Check execution of loci profile (CRAM, pbq=20)");
+ok($obj->configure($cram, 20), "Configure for loci profile (CRAM, pbq=20)");
+is(1, $obj->get_full_loci_profile($fh, $loci), "Check execution of loci profile (CRAM, pbq=20)");
 close $fh;
 is_deeply(tsv_to_data($buffer), \@PBQ20_RESULT, "Expected result for defaults (CRAM, pbq=20)");
 
 # test with mapq=1
 $buffer = "";
 open $fh, '>', \$buffer or die $!;
-is(1, $obj->get_full_loci_profile($cram, $fh, $loci, undef, 1), "Check execution of loci profile (CRAM, mapq=1)");
+ok($obj->configure($cram, undef, 1), "Configure for loci profile (CRAM, mapq=1)");
+is(1, $obj->get_full_loci_profile($fh, $loci), "Check execution of loci profile (CRAM, mapq=1)");
 close $fh;
 is_deeply(tsv_to_data($buffer), \@MAPQ0_RESULT, "Expected result for defaults (CRAM, mapq=1)");
 
