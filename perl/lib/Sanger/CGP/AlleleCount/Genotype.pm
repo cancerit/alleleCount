@@ -33,6 +33,7 @@ use Sanger::CGP::AlleleCount::PileupData;
 use Bio::DB::HTS;
 use Bio::DB::HTS::AlignWrapper;
 
+use List::Util qw(first);
 use Const::Fast qw(const);
 
 const my $MAX_PILEUP_DEPTH => 1_000_000;
@@ -47,24 +48,34 @@ my $g_map_qual;
 my $g_sam;
 my $this_pos;
 
+=item new
+
+Null constructor
+
+=cut
+
 sub new {
-  my ($class, $opts) = @_;
+  my ($class) = @_;
   my $self = { };
   bless $self, $class;
-  if(defined $opts) {
-    $self->{'species'} = $opts->{'species'};
-    $self->{'build'} = $opts->{'build'};
-  }
   return $self;
 }
 
+=item configure
+
+Set up the object for the current analysis.
+
+  $genotype->configure('my.bam', $min_pbq, $min_mapq [, $fasta])
+
+=cut
+
 sub configure {
   my ($self, $bam_file, $min_pbq, $min_mapq, $fasta) = @_;
-  $self->{'_min_pbq'} = $min_pbq || $MIN_PBQ;
-  $self->{'_min_mapq'} = $min_mapq || $MIN_MAPQ;
   my $sam = Bio::DB::HTS->new(-bam => $bam_file, -fasta=> $fasta);
   $sam->max_pileup_cnt($MAX_PILEUP_DEPTH);
-  $self->{'_sam'} = $sam;
+  $g_pb_qual = $min_pbq || $MIN_PBQ;
+  $g_map_qual = $min_mapq || $MIN_MAPQ;
+  $g_sam = $sam;
 }
 
 =item get_full_snp6_profile
@@ -74,17 +85,16 @@ Uses all snps defined in file used by ngs_cn (format slightly different)
 
 =cut
 sub get_full_snp6_profile {
-  my ($self, $fh) = @_;
-  $g_pb_qual = $self->{'_min_pbq'};
-  $g_map_qual = $self->{'_min_mapq'};
-  $g_sam = $self->{'_sam'};
-  my $snp6_file = $self->ngs_cn_snps({'species'=>'HUMAN','build'=>37});
+  my ($self, $bam_file, $fh, $loci_file, $min_pbq, $min_mapq, $fasta) = @_;
+  $self->configure($bam_file, $min_pbq, $min_mapq, $fasta);
+  my @valid_chrs = $g_sam->seq_ids;
   my ($region, $chr, $pos, $allA, $allB);
   print $fh "#CHR\tPOS\tCount_Allele_A\tCount_Allele_B\tGood_depth\n" or croak "Failed to write line: $OS_ERROR\n";
-  open my $SNP6, '<', $snp6_file or croak "Unable to open $snp6_file for reading: $OS_ERROR\n";
+  open my $SNP6, '<', $loci_file or croak "Unable to open $loci_file for reading: $OS_ERROR\n";
   while(my $line = <$SNP6>) {
     chomp $line;
     ($chr, $pos, undef, undef, $allA, $allB) = split /\s/, $line;
+    die "Chromosome '$chr' at line $. in $loci_file cannot be found in $bam_file" unless(first {$_ eq $chr} @valid_chrs);
     $g_pu_data = Sanger::CGP::AlleleCount::PileupData->new($chr, $pos, $allA, $allB);
     $this_pos = $pos;
     $region = $chr.':'.$pos.'-'.$pos;
@@ -102,16 +112,16 @@ Uses all loci defined in specified file
 
 =cut
 sub get_full_loci_profile {
-  my ($self, $fh, $loci_file) = @_;
-  $g_pb_qual = $self->{'_min_pbq'};
-  $g_map_qual = $self->{'_min_mapq'};
-  $g_sam = $self->{'_sam'};
+  my ($self, $bam_file, $fh, $loci_file, $min_pbq, $min_mapq, $fasta) = @_;
+  $self->configure($bam_file, $min_pbq, $min_mapq, $fasta);
+  my @valid_chrs = $g_sam->seq_ids;
   my ($region, $chr, $pos, $allA, $allB);
   print $fh "#CHR\tPOS\tCount_A\tCount_C\tCount_G\tCount_T\tGood_depth\n" or croak "Failed to write line: $OS_ERROR\n";
   open my $LOCI, '<', $loci_file or croak 'Unable to open '.$loci_file.' for reading';
   while(my $line = <$LOCI>) {
     chomp $line;
     ($chr, $pos) = split /\s/, $line;
+    die "Chromosome '$chr' at line $. in $loci_file cannot be found in $bam_file" unless(first {$_ eq $chr} @valid_chrs);
     $g_pu_data = Sanger::CGP::AlleleCount::PileupData->new($chr, $pos);
     $this_pos = $pos;
     $region = $chr.':'.$pos.'-'.$pos;
@@ -141,10 +151,9 @@ or
 
 =cut
 sub gender_chk {
-  my ($self, $fh, $loci_file) = @_;
-  $g_pb_qual = $self->{'_min_pbq'};
-  $g_map_qual = $self->{'_min_mapq'};
-  $g_sam = $self->{'_sam'};
+  my ($self, $bam_file, $fh, $loci_file, $min_pbq, $min_mapq, $fasta) = @_;
+  $self->configure($bam_file, $min_pbq, $min_mapq, $fasta);
+  my @valid_chrs = $g_sam->seq_ids;
   my $sex_chr;
   my $is_male = 'N';
   my ($region, $chr, $pos, $allA, $allB);
@@ -152,6 +161,7 @@ sub gender_chk {
   while(my $line = <$LOCI>) {
     chomp $line;
     ($chr, $pos) = split /\s/, $line;
+    die "Chromosome '$chr' at line $. in $loci_file cannot be found in $bam_file" unless(first {$_ eq $chr} @valid_chrs);
     if(defined $sex_chr) {
       die "Only loci expected on the 'male' sex chromosome should be included in: $loci_file\n\tYou have $sex_chr & $chr so far!\n" if($chr ne $sex_chr);
     }
