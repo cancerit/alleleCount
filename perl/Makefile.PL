@@ -39,5 +39,6 @@ WriteMakefile(
                      'Pod::Coverage' => 0.23,
                      'Bio::DB::HTS' => 1.11,
                      'Bio::Root::Version' => 1.006924,
+                     'IPC::System::Simple' => 1.25,
                    }
 );
