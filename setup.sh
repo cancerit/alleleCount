@@ -36,7 +36,7 @@ done_message () {
             echo $1
         fi
     else
-        echo " failed.  See setup.log file for error messages." $2
+        echo " failed.  See above messages." $2
         echo "    Please check INSTALL file for items that should be installed by a package manager"
         exit 1
     fi
@@ -100,22 +100,6 @@ echo "Max compilation CPUs set to $CPU"
 
 # get current directory
 INIT_DIR=`pwd`
-
-# re-initialise log file
-echo > $INIT_DIR/setup.log
-
-# log information about this system
-(
-    echo '============== System information ===='
-    set -x
-    lsb_release -a
-    uname -a
-    sw_vers
-    system_profiler
-    grep MemTotal /proc/meminfo
-    set +x
-    echo; echo
-) >>$INIT_DIR/setup.log 2>&1
 
 set -e
 
@@ -242,11 +226,6 @@ fi
 
 cd $INIT_DIR/perl
 
-echo -n "Installing Perl prerequisites ..."
-if ! ( perl -MExtUtils::MakeMaker -e 1 >/dev/null 2>&1); then
-    echo
-    echo "WARNING: Your Perl installation does not seem to include a complete set of core modules.  Attempting to cope with this, but if installation fails please make sure that at least ExtUtils::MakeMaker is installed.  For most users, the best way to do this is to use your system's package manager: apt, yum, fink, homebrew, or similar."
-fi
 $CPANM --mirror http://cpan.metacpan.org --notest -l $INST_PATH/ --installdeps $INIT_DIR/perl/. < /dev/null
 done_message "" "Failed during installation of core dependencies."
 
