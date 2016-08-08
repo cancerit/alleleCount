@@ -1,0 +1,28 @@
+notifications:
+  slack: wtsi-cgpit:ptUMR1tkNyZJYd9TpGoss8WR
+  email: false
+
+env:
+ - CC=gcc
+
+addons:
+ apt:
+  packages:
+   - build-essential
+   - autoconf
+   - curl
+   - zlib1g-dev
+   - libncurses5-dev
+   - libpstreams-dev
+   - libcurl4-openssl-dev
+
+install: true
+
+language: perl
+
+perl:
+ - "5.22"
+# - "5.16"
+
+script:
+ - ./setup.sh ~/wtsi-opt
