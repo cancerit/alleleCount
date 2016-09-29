@@ -25,7 +25,7 @@ package Sanger::CGP::AlleleCount;
 use strict;
 
 use base 'Exporter';
-our $VERSION = '3.1.1';
+our $VERSION = '3.2.0';
 our @EXPORT = qw($VERSION);
 
 1;
