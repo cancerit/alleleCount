@@ -25,4 +25,6 @@ perl:
 # - "5.16"
 
 script:
- - ./setup.sh ~/wtsi-opt
+ - ./setup.sh $HOME/wtsi-opt
+ - ls -l $HOME/wtsi-opt/bin/alleleCounter
+ - ls -l $HOME/wtsi-opt/bin/alleleCounter.pl

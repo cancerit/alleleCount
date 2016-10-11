@@ -21,26 +21,10 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 ##########LICENCE##########
 
-SOURCE_SAMTOOLS="https://github.com/samtools/samtools/releases/download/1.3.1/samtools-1.3.1.tar.bz2"
 
-# for bamstats and Bio::DB::HTS
-SOURCE_HTSLIB="https://github.com/samtools/htslib/releases/download/1.3.1/htslib-1.3.1.tar.bz2"
-
-# Bio::DB::HTS
-SOURCE_BIOBDHTS="https://github.com/Ensembl/Bio-HTS/archive/2.3.tar.gz"
-
-done_message () {
-    if [ $? -eq 0 ]; then
-        echo " done."
-        if [ "x$1" != "x" ]; then
-            echo $1
-        fi
-    else
-        echo " failed.  See above messages." $2
-        echo "    Please check INSTALL file for items that should be installed by a package manager"
-        exit 1
-    fi
-}
+SOURCE_SAMTOOLS="https://github.com/samtools/samtools/releases/download/1.3/samtools-1.3.tar.bz2"
+SOURCE_HTSLIB="https://github.com/samtools/htslib/archive/1.3.tar.gz"
+BIODBHTS_INSTALL="https://raw.githubusercontent.com/Ensembl/Bio-HTS/master/INSTALL.pl"
 
 get_distro () {
   EXT=""
@@ -88,6 +72,7 @@ if [[ $# -eq 2 ]] ; then
   CGP_PERLLIBS=$2
 fi
 
+
 CPU=`grep -c ^processor /proc/cpuinfo`
 if [ $? -eq 0 ]; then
   if [ "$CPU" -gt "6" ]; then
@@ -115,12 +100,10 @@ PERLROOT=$INST_PATH/lib/perl5
 
 # allows user to knowingly specify other PERL5LIB areas.
 if [ -z ${CGP_PERLLIBS+x} ]; then
-  PERL5LIB="$PERLROOT"
+  export PERL5LIB="$PERLROOT"
 else
-  PERL5LIB="$PERLROOT:$CGP_PERLLIBS"
+  export PERL5LIB="$PERLROOT:$CGP_PERLLIBS"
 fi
-
-export PERL5LIB=$PERL5LIB
 
 export PATH=$INST_PATH/bin:$PATH
 
@@ -132,112 +115,83 @@ mkdir -p $SETUP_DIR
 get_file $SETUP_DIR/cpanm https://cpanmin.us/
 perl $SETUP_DIR/cpanm -l $INST_PATH App::cpanminus
 CPANM=`which cpanm`
-echo $CPANM
 
 if [ -e $SETUP_DIR/basePerlDeps.success ]; then
   echo "Previously installed base perl deps..."
 else
-  perlmods=( "ExtUtils::CBuilder" "Module::Build~0.42" "File::ShareDir" "File::ShareDir::Install" "Const::Fast" "File::Which" "LWP::UserAgent" "Bio::Root::Version~1.006009001")
+  perlmods=( "ExtUtils::CBuilder" "Module::Build~0.42" "File::ShareDir" "File::ShareDir::Install" "Const::Fast" "File::Which" "LWP::UserAgent" "Bio::Root::Version@1.006924")
   for i in "${perlmods[@]}" ; do
-    $CPANM -v --no-interactive --notest --mirror http://cpan.metacpan.org -l $INST_PATH $i
+    $CPANM --no-interactive --notest --mirror http://cpan.metacpan.org -l $INST_PATH $i
   done
   touch $SETUP_DIR/basePerlDeps.success
 fi
 
 cd $SETUP_DIR
 
-echo -n "Get htslib ..."
-if [ -e $SETUP_DIR/htslibGet.success ]; then
-  echo " already staged ...";
+echo -n "Building samtools ..."
+if [ -e "$SETUP_DIR/samtools.success" ]; then
+  echo -n " previously installed ...";
 else
-  echo
   cd $SETUP_DIR
-  get_distro "htslib" $SOURCE_HTSLIB
-  touch $SETUP_DIR/htslibGet.success
+  get_distro "samtools" $SOURCE_SAMTOOLS
+  cd samtools
+  ./configure --enable-plugins --enable-libcurl --prefix=$INST_PATH
+  make all all-htslib
+  make install install-htslib
+  touch $SETUP_DIR/samtools.success
 fi
-
-cd $SETUP_DIR
-
-echo -n "Building Bio::DB::HTS ..."
-if [ -e $SETUP_DIR/biohts.success ]; then
-  echo " previously installed ...";
-else
-  echo
-  cd $SETUP_DIR
-  rm -rf bioDbHts
-  get_distro "bioDbHts" $SOURCE_BIOBDHTS
-  mkdir -p bioDbHts/htslib
-  tar --strip-components 1 -C bioDbHts -zxf bioDbHts.tar.gz
-  tar --strip-components 1 -C bioDbHts/htslib -jxf $SETUP_DIR/htslib.tar.bz2
-  cd bioDbHts/htslib
-  perl -pi -e 'if($_ =~ m/^CFLAGS/ && $_ !~ m/\-fPIC/i){chomp; s/#.+//; $_ .= " -fPIC -Wno-unused -Wno-unused-result\n"};' Makefile
-  make -j$CPU
-  rm -f libhts.so*
-  cd ../
-  env HTSLIB_DIR=$SETUP_DIR/bioDbHts/htslib perl Build.PL --install_base=$INST_PATH
-  ./Build test
-  ./Build install
-  cd $SETUP_DIR
-  rm -f bioDbHts.tar.gz
-  touch $SETUP_DIR/biohts.success
-fi
-
-cd $SETUP_DIR
 
 echo -n "Building htslib ..."
 if [ -e $SETUP_DIR/htslib.success ]; then
-  echo " previously installed ...";
+  echo -n " previously installed ...";
 else
-  echo
-  mkdir -p htslib
-  tar --strip-components 1 -C htslib -jxf htslib.tar.bz2
-  cd htslib
-  ./configure --enable-plugins --enable-libcurl --prefix=$INST_PATH
-  make -j$CPU
-  make install
   cd $SETUP_DIR
+  get_distro "htslib" $SOURCE_HTSLIB
+  make -C htslib -j$CPU
   touch $SETUP_DIR/htslib.success
 fi
 
-export HTSLIB=$INST_PATH
+export HTSLIB="$SETUP_DIR/htslib"
 
-cd $INIT_DIR
-
-if [[ ",$COMPILE," == *,samtools,* ]] ; then
-  echo -n "Building samtools ..."
-  if [ -e $SETUP_DIR/samtools.success ]; then
-    echo " previously installed ...";
-  else
-  echo
-    cd $SETUP_DIR
-    rm -rf samtools
-    get_distro "samtools" $SOURCE_SAMTOOLS
-    mkdir -p samtools
-    tar --strip-components 1 -C samtools -xjf samtools.tar.bz2
-    cd samtools
-    ./configure --enable-plugins --enable-libcurl --prefix=$INST_PATH
-    make -j$CPU all all-htslib
-    make install all all-htslib
-    cd $SETUP_DIR
-    rm -f samtools.tar.bz2
-    touch $SETUP_DIR/samtools.success
-  fi
+echo -n "Building alleleCounter ..."
+if [ -e "$SETUP_DIR/alleleCounter.success" ]; then
+  echo -n " previously installed ...";
 else
-  echo "samtools - No change between PCAP versions"
+  cd $INIT_DIR
+  mkdir -p $INIT_DIR/c/bin
+  make -C c -j$CPU
+  cp $INIT_DIR/c/bin/alleleCounter $INST_PATH/bin/.
+  make -C c clean
+  touch $SETUP_DIR/alleleCounter.success
+fi
+
+CHK=`perl -le 'eval "require $ARGV[0]" and print $ARGV[0]->VERSION' Bio::DB::HTS`
+if [[ "x$CHK" == "x" ]] ; then
+  echo -n "Building Bio::DB::HTS ..."
+  cd $SETUP_DIR
+  # now Bio::DB::HTS
+  get_file "INSTALL.pl" $BIODBHTS_INSTALL
+  perl -I $PERL5LIB INSTALL.pl --prefix $INST_PATH --static
+  rm -f BioDbHTS_INSTALL.pl
+else
+  echo "Bio::DB::HTS already installed"
 fi
 
 cd $INIT_DIR/perl
 
-$CPANM --mirror http://cpan.metacpan.org --notest -l $INST_PATH/ --installdeps $INIT_DIR/perl/. < /dev/null
-done_message "" "Failed during installation of core dependencies."
+echo -n "Installing Perl prerequisites ..."
+if ! ( perl -MExtUtils::MakeMaker -e 1 >/dev/null 2>&1); then
+    echo
+    echo "WARNING: Your Perl installation does not seem to include a complete set of core modules.  Attempting to cope with this, but if installation fails please make sure that at least ExtUtils::MakeMaker is installed.  For most users, the best way to do this is to use your system's package manager: apt, yum, fink, homebrew, or similar."
+fi
+$CPANM --no-interactive --notest --mirror http://cpan.metacpan.org -l $INST_PATH/ --installdeps $INIT_DIR/perl/. < /dev/null
 
 echo -n "Installing alleleCount ..."
-cd $INIT_DIR/perl &&
-perl Makefile.PL INSTALL_BASE=$INST_PATH &&
-make &&
-make test &&
+cd $INIT_DIR/perl
+perl Makefile.PL INSTALL_BASE=$INST_PATH
+make
+make test
 make install
-done_message "" "alleleCount install failed."
 
 # cleanup all junk
 rm -rf $SETUP_DIR
