@@ -169,7 +169,6 @@ CHK=`perl -le 'eval "require $ARGV[0]" and print $ARGV[0]->VERSION' Bio::DB::HTS
 if [[ "x$CHK" == "x" ]] ; then
   echo -n "Building Bio::DB::HTS ..."
   cd $SETUP_DIR
-  $CPANM --mirror http://cpan.metacpan.org --notest -l $INST_PATH Module::Build Bio::Root::Version
   # now Bio::DB::HTS
   get_file "INSTALL.pl" $BIODBHTS_INSTALL
   perl -I $PERL5LIB INSTALL.pl --prefix $INST_PATH --static
