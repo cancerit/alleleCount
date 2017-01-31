@@ -4,6 +4,9 @@ alleleCount
 The alleleCount package primarily exists to prevent code duplication between some other projects,
 specifically AscatNGS and Battenburg.
 
+[![Build Status](https://travis-ci.org/cancerit/alleleCount.svg?branch=master)](https://travis-ci.org/cancerit/alleleCount) : master  
+[![Build Status](https://travis-ci.org/cancerit/alleleCount.svg?branch=dev)](https://travis-ci.org/cancerit/alleleCount) : dev
+
 The project contains 2 equivalent implementations of allele counting code in perl and C for BAM/CRAM processing.
 
 ## Loci File
