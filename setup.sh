@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ##########LICENCE##########
-# Copyright (c) 2014-2016 Genome Research Ltd.
+# Copyright (c) 2014-2017 Genome Research Ltd.
 #
 # Author: CancerIT <cgpit@sanger.ac.uk>
 #
@@ -21,9 +21,8 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 ##########LICENCE##########
 
-
-SOURCE_SAMTOOLS="https://github.com/samtools/samtools/releases/download/1.3/samtools-1.3.tar.bz2"
-SOURCE_HTSLIB="https://github.com/samtools/htslib/archive/1.3.tar.gz"
+SOURCE_SAMTOOLS="https://github.com/samtools/samtools/releases/download/1.3.1/samtools-1.3.1.tar.bz2"
+SOURCE_HTSLIB="https://github.com/samtools/htslib/releases/download/1.3.2/htslib-1.3.2.tar.bz2"
 BIODBHTS_INSTALL="https://raw.githubusercontent.com/Ensembl/Bio-HTS/master/INSTALL.pl"
 
 get_distro () {
