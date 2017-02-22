@@ -29,7 +29,7 @@ LFLAGS?= -L$(HTSTMP)
 # define any libraries to link into executable:
 #   if I want to link in libraries (libx.so or libx.a) I use the -llibname
 #   option, something like (this will link in libmylib.so and libm.so:
-LIBS=-lhts -lpthread -lz
+LIBS=-lhts -lpthread -lz -ldl
 
 # define the C source files
 SRCS=./src/bam_access.c
@@ -63,21 +63,24 @@ COUNTER_TARGET=./bin/alleleCounter
 
 .NOTPARALLEL: test
 
-all: clean make_htslib_tmp $(COUNTER_TARGET) test remove_htslib_tmp
+all: clean make_bin make_htslib_tmp $(COUNTER_TARGET) test remove_htslib_tmp
 	@echo  Binaries have been compiled.
 
 $(COUNTER_TARGET): $(OBJS)
-	$(CC) $(CFLAGS) $(JOIN_INCLUDES) $(INCLUDES) -o $(COUNTER_TARGET) $(OBJS) $(LFLAGS) $(CAT_LFLAGS) $(LIBS) ./src/alleleCounter.c
+	$(CC) $(JOIN_INCLUDES) $(INCLUDES) $(CFLAGS) -o $(COUNTER_TARGET) $(OBJS) $(LFLAGS) $(CAT_LFLAGS) $(LIBS) ./src/alleleCounter.c
 
 #Unit Tests
 test: $(COUNTER_TARGET)
-test: CFLAGS += $(INCLUDES) $(OBJS) $(LFLAGS) $(LIBS)
+test: CFLAGS += $(JOIN_INCLUDES) $(INCLUDES) $(OBJS) $(LFLAGS) $(LIBS) $(CAT_LFLAGS)
 test: $(TESTS)
 	sh ./tests/runtests.sh
 
 #Unit tests with coverage
 coverage: CFLAGS += --coverage
 coverage: test
+
+make_bin:
+	$(MD) ./bin
 
 make_htslib_tmp:
 	$(MD) $(HTSTMP)
