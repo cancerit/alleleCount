@@ -12,10 +12,14 @@ CFLAGS = -g -Wall
 HTSLOC?=$(HTSLIB)
 
 HTSTMP?=./htslib_tmp
+prefix=?/usr/local/
 
 #Define locations of header files
 OPTINC?=-I$(HTSLOC)/
 INCLUDES= -Isrc/ $(OPTINC) -rdynamic
+
+JOIN_INCLUDES= -I$(prefix)/include
+CAT_LFLAGS= -L$(prefix)/lib
 
 # define library paths in addition to /usr/lib
 #   if I wanted to include libraries not in /usr/lib I'd specify
@@ -63,7 +67,7 @@ all: clean make_htslib_tmp $(COUNTER_TARGET) test remove_htslib_tmp
 	@echo  Binaries have been compiled.
 
 $(COUNTER_TARGET): $(OBJS)
-	$(CC) $(CFLAGS) $(INCLUDES) -o $(COUNTER_TARGET) $(OBJS) $(LFLAGS) $(LIBS) ./src/alleleCounter.c
+	$(CC) $(CFLAGS) $(JOIN_INCLUDES) $(INCLUDES) -o $(COUNTER_TARGET) $(OBJS) $(LFLAGS) $(CAT_LFLAGS) $(LIBS) ./src/alleleCounter.c
 
 #Unit Tests
 test: $(COUNTER_TARGET)
@@ -93,7 +97,7 @@ valgrind:
 # the rule(a .c file) and $@: the name of the target of the rule (a .o file)
 # (see the gnu make manual section about automatic variables)
 .c.o:
-	$(CC) $(CFLAGS) $(INCLUDES) -c $<  -o $@
+	$(CC) $(CFLAGS) $(JOIN_INCLUDES) $(INCLUDES) -c $<  -o $@
 
 clean:
 	$(RM) ./src/*.o *~ $(COUNTER_TARGET) ./bin/* ./tests/tests_log $(TESTS) ./src/*.gcda ./src/*.gcov ./src/*.gcno *.gcda *.gcov *.gcno ./tests/*.gcda ./tests/*.gcov ./tests/*.gcno
