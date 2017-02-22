@@ -25,7 +25,7 @@
 #include <dbg.h>
 #include <assert.h>
 #include <limits.h>
-#include <cram/cram.h>
+#include <htslib/cram.h>
 
 #define PO10_LIMIT (INT_MAX/10)
 
