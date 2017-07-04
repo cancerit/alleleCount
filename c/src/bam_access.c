@@ -1,5 +1,5 @@
 /**   LICENSE
-* Copyright (c) 2014,2015 Genome Research Ltd.
+* Copyright (c) 2014-2017 Genome Research Ltd.
 *
 * Author: Cancer Genome Project cgpit@sanger.ac.uk
 *
@@ -36,6 +36,8 @@ int include_dup = 0;
 int include_se = 0;
 int min_base_qual = 20;
 int min_map_qual = 35;
+int inc_flag = ;
+int exc_flag = ;
 int maxitercnt = 1000000000; //Overrride internal maxcnt for iterator!
 
 typedef struct {
@@ -130,11 +132,7 @@ loci_stats *bam_access_get_position_base_counts(char *chr, int posn){
   int result;
   int count = 0;
   while ((result = sam_itr_next(fholder->in, iter, b)) >= 0) {
-    if(b->core.qual < min_map_qual || (b->core.flag & BAM_FUNMAP)
-			|| !(b->core.flag & BAM_FPROPER_PAIR) || (b->core.flag & BAM_FMUNMAP)//Proper pair and mate unmapped
-			|| (b->core.flag & BAM_FDUP)//1024 is PCR/optical duplicate
-			|| (b->core.flag & BAM_FSECONDARY) || (b->core.flag & BAM_FQCFAIL)//Secondary alignment, quality fail
-			|| (b->core.flag & BAM_FSUPPLEMENTARY) ) continue;
+    if(b->core.qual < min_map_qual || (b->core.flag & exc_flag) || (b->core.flag & inc_flag) != inc_flag) continue;
     count++;
     bam_plp_push(buf, b);
   }
@@ -195,8 +193,6 @@ error:
 	return NULL;
 }
 
-
-
 void bam_access_min_base_qual(int qual){
 	min_base_qual = qual;
 	return;
@@ -205,4 +201,14 @@ void bam_access_min_base_qual(int qual){
 void bam_access_min_map_qual(int qual){
 	min_map_qual = qual;
 	return;
+}
+
+void bam_access_inc_flag(int inc){
+  inc_flag = inc;
+  return;
+}
+
+void bam_access_exc_flag(int exc){
+  exc_flag = exc;
+  return;
 }

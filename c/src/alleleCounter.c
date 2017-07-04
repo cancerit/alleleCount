@@ -1,5 +1,5 @@
 /**   LICENSE
-* Copyright (c) 2014,2015 Genome Research Ltd.
+* Copyright (c) 2014-2017 Genome Research Ltd.
 *
 * Author: Cancer Genome Project cgpit@sanger.ac.uk
 *
@@ -34,7 +34,10 @@ static char *loci_file;
 static char *out_file;
 static char *ref_file;
 static char *contig = NULL;
+static int inc_flag = 3; //Paired, proper pair
+static int exc_flag = 3852; // Read unmapped, Mate unmapped, Secondary alignment, Fails QC, Duplicate, Supplementary alignment
 static int snp6 = 0;
+static int is_dense = 0;
 
 int check_exist(char *fname){
 	FILE *fp;
@@ -58,6 +61,10 @@ void alleleCounter_print_usage (int exit_code){
 	printf (" -m  --min-base-qual [int]       Minimum base quality [Default: %d].\n",min_base_q);
 	printf (" -q  --min-map-qual [int]        Minimum mapping quality [Default: %d].\n",min_map_q);
 	printf (" -c  --contig [string]           Limit calling to named contig.\n");
+	printf (" -d  --dense-snps                Improves performance where many positions are close together \n");
+	printf ("                                 by iterating through bam file rather than using a 'fetch' approach.\n");
+	printf (" -f  --required-flag [int]       Flag value of reads to retain in allele counting.\n");
+	printf (" -F  --filtered-flag [int]       Flag value of reads to exclude in allele counting.\n");
 	printf (" -v  --version                   Display version number.\n");
 	printf (" -h  --help                      Display this usage information.\n\n");
   exit(exit_code);
@@ -80,6 +87,9 @@ void alleleCounter_setup_options(int argc, char *argv[]){
 							{"min-map-qual", required_argument, 0, 'q'},
 							{"is-snp6", required_argument, 0, 's'},
 							{"contig", required_argument, 0, 'c'},
+							{"dense-snps", no_argument, 0, 'd'},
+							{"required-flag", no_argument, 0, 'f'},
+							{"filtered-flag", no_argument, 0, 'F'},
 							{"version", no_argument, 0, 'v'},
              	{"help", no_argument, 0, 'h'},
              	{ NULL, 0, NULL, 0}
@@ -89,7 +99,7 @@ void alleleCounter_setup_options(int argc, char *argv[]){
    int iarg = 0;
 
    //Iterate through options
-   while((iarg = getopt_long(argc, argv, "l:b:m:o:q:r:c:hsv", long_opts, &index)) != -1){
+   while((iarg = getopt_long(argc, argv, "f:F:l:b:m:o:q:r:c:hdsv", long_opts, &index)) != -1){
    	switch(iarg){
    		  case 'h':
          	alleleCounter_print_usage(0);
@@ -129,6 +139,18 @@ void alleleCounter_setup_options(int argc, char *argv[]){
 
       	case 'c':
       	  contig = optarg;
+          break;
+
+        case 'd':
+          is_dense = 1;
+          break;
+
+        case 'f':
+          inc_flag = atoi(optarg);
+          break;
+
+        case 'F':
+          exc_flag = atoi(optarg);
           break;
 
 				case '?':
@@ -260,6 +282,10 @@ int main(int argc, char *argv[]){
 
 	bam_access_min_map_qual(min_map_q);
 
+	bam_access_inc_flag(inc_flag);
+
+	bam_access_exc_flag(exc_flag);
+
 	FILE *loci_in = NULL;
 	//Open output file for writing
 	FILE *output = fopen(out_file,"w");
@@ -272,29 +298,36 @@ int main(int argc, char *argv[]){
 	chk = bam_access_openhts(hts_file,ref_file);
 	check(chk == 0,"Error trying to open sequence/index files '%s'.",hts_file);
 
-	//Open loci file
-	loci_in = fopen(loci_file,"r");
-	check(loci_in != NULL, "Error opening loci file %s for reading.",loci_file);
-	char chr[50];
-	int pos;
-	char allele_A;
-	char allele_B;
-	char line[512];
-	int i = 0;
-	while ( fgets(line,sizeof(line),loci_in) != NULL ){
-		i++;
-		int check = get_position_info_from_file(line,chr,&pos,snp6,&allele_A,&allele_B,i);
-		check(check==0,"Error trying to fetch position from file.");
-		if(contig != NULL && strcmp(contig,chr) != 0) continue;
+  //Open loci file
+  loci_in = fopen(loci_file,"r");
+  check(loci_in != NULL, "Error opening loci file %s for reading.",loci_file);
 
-		loci_stats *stats = bam_access_get_position_base_counts(chr,pos);
-		int depth = stats->base_counts[0]+stats->base_counts[1]+stats->base_counts[2]+stats->base_counts[3];
-		int check_print = print_section(output,chr,pos,stats->base_counts[0],
-								stats->base_counts[1],stats->base_counts[2],stats->base_counts[3],depth,
-								snp6,allele_A,allele_B);
-		check(check_print>0,"Error printing line to output file: %s: %d.",chr,pos);
+  if(is_dense){
 
-		free(stats);
+  }else{
+
+
+    char chr[50];
+    int pos;
+    char allele_A;
+    char allele_B;
+    char line[512];
+    int i = 0;
+    while ( fgets(line,sizeof(line),loci_in) != NULL ){
+      i++;
+      int check = get_position_info_from_file(line,chr,&pos,snp6,&allele_A,&allele_B,i);
+      check(check==0,"Error trying to fetch position from file.");
+      if(contig != NULL && strcmp(contig,chr) != 0) continue;
+
+      loci_stats *stats = bam_access_get_position_base_counts(chr,pos);
+      int depth = stats->base_counts[0]+stats->base_counts[1]+stats->base_counts[2]+stats->base_counts[3];
+      int check_print = print_section(output,chr,pos,stats->base_counts[0],
+                  stats->base_counts[1],stats->base_counts[2],stats->base_counts[3],depth,
+                  snp6,allele_A,allele_B);
+      check(check_print>0,"Error printing line to output file: %s: %d.",chr,pos);
+
+		  free(stats);
+		}
 	}
 
 	//Close files.
