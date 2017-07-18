@@ -63,8 +63,8 @@ void alleleCounter_print_usage (int exit_code){
 	printf (" -c  --contig [string]           Limit calling to named contig.\n");
 	printf (" -d  --dense-snps                Improves performance where many positions are close together \n");
 	printf ("                                 by iterating through bam file rather than using a 'fetch' approach.\n");
-	printf (" -f  --required-flag [int]       Flag value of reads to retain in allele counting.\n");
-	printf (" -F  --filtered-flag [int]       Flag value of reads to exclude in allele counting.\n");
+	printf (" -f  --required-flag [int]       Flag value of reads to retain in allele counting default: [%i].\n",inc_flag);
+	printf (" -F  --filtered-flag [int]       Flag value of reads to exclude in allele counting default: [%i].\n",exc_flag);
 	printf (" -v  --version                   Display version number.\n");
 	printf (" -h  --help                      Display this usage information.\n\n");
   exit(exit_code);
@@ -243,38 +243,125 @@ int print_section(FILE *output, char *chr, int pos, int a_cnt, int c_cnt, int g_
 		return -1;
 }
 
-int get_position_info_from_file(char *line, char *chr, int *pos,int snp6, char *allele_A, char *allele_B, int i){
+int get_position_info_from_file(char *line, loci_stats *stats, int snp6, int i){
 	int chr_d = 0;
 
 	if(snp6==1){
-		int chk = sscanf(line,"%d%*[ \t]%d%*[ \t]%*s%*[ \t]%*s%*[ \t]%c%*[ \t]%c",&chr_d,pos,allele_A,allele_B);
+		int chk = sscanf(line,"%d%*[ \t]%d%*[ \t]%*s%*[ \t]%*s%*[ \t]%c%*[ \t]%c",&chr_d,&(stats->pos),&(stats->allele_A),&(stats->allele_B));
 		if(chk == 2){
-			int try = sprintf(chr,"%d",chr_d);
+			int try = sprintf(stats->chr,"%d",chr_d);
 			check(try >0,"Error trying to convert chromosome name '%d'to string.",chr_d);
 		}else{
 			//Try again but a string match
-			chk = sscanf(line,"%s%*[ \t]%d%*[ \t]%*s%*[ \t]%*s%*[ \t]%c%*[ \t]%c",chr,pos,allele_A,allele_B);
+			chk = sscanf(line,"%s%*[ \t]%d%*[ \t]%*s%*[ \t]%*s%*[ \t]%c%*[ \t]%c",stats->chr,&(stats->pos),&(stats->allele_A),&(stats->allele_B));
 			check(chk==4,"Error attempting string match of allele position info from SNP6 line %s.",line);
 		}
 		check(chk==2,"Error parsing SNP6 file line number %d: '%s'.",i,line);
 	}else{
-		int chk = sscanf(line,"%d%*[ \t]%d",&chr_d,pos);
+		int chk = sscanf(line,"%d%*[ \t]%d",&chr_d,&(stats->pos));
 		if(chk == 2){
-			int try = sprintf(chr,"%d",chr_d);
+			int try = sprintf(stats->chr,"%d",chr_d);
 			check(try >0,"Error trying to convert chromosome name '%d'to string.",chr_d);
 		}else{
 			//Try again but a string match
-			chk = sscanf(line,"%s%*[ \t]%d",chr,pos);
+			chk = sscanf(line,"%s%*[ \t]%d",stats->chr,&(stats->pos));
 			check(chk==2,"Error parsing loci file line number %d as a string match: '%s'.",i,line);
 		}
 		check(chk==2,"Error parsing loci file line number %d: '%s'.",i,line);
 	}
 	return 0;
-error:
-	return -1;
+	error:
+		return -1;
+}
+
+int line_count (char *file_path){
+  FILE *f = fopen(file_path,"r");
+  int line_count = 0;
+  check(f != NULL, "Error opening file '%s' to count lines.",file_path);
+  char rd[ 5000 ];
+	while(fgets(rd, sizeof(rd), f) != NULL){
+    line_count++;
+  }
+  fclose(f);
+  return line_count;
+	error:
+  if(f) fclose(f);
+  return -1;
+}
+
+int sort_loci_stats(const void *a1, const void *b1){
+	loci_stats *a = *(loci_stats * const *)a1;
+	loci_stats *b = *(loci_stats * const *)b1;
+	int res = strcmp(a->chr,b->chr);
+	if(res==0){
+		if(a->pos == b->pos){
+			return 0;
+		}else{
+			return a->pos < b->pos ? -1 : 1;
+		}
+	}else{
+		return res;
+	}
+}
+
+int init_base_counts(loci_stats *stats){
+	stats->base_counts = malloc(sizeof(int) * 4);
+	check_mem(stats->base_counts);
+	stats->base_counts[0] = 0;
+	stats->base_counts[1] = 0;
+	stats->base_counts[2] = 0;
+	stats->base_counts[3] = 0;
+	return 0;
+	error:
+	return 1;
+}
+
+loci_stats ** read_locis_from_file(char *loci_file, int *line_cnt){
+	FILE *loci_in = NULL;
+	loci_stats **stats= NULL;
+	*line_cnt = line_count(loci_file);
+	check(*line_cnt>=0,"Error counting lines in loci file: %s",loci_file);
+
+	stats = malloc(sizeof(loci_stats*)*(*line_cnt));
+	check_mem(stats);
+	//Open loci file
+  loci_in = fopen(loci_file,"r");
+  check(loci_in != NULL, "Error opening loci file %s for reading.",loci_file);
+	int i=0;
+	char line[2048];
+	while ( fgets(line,sizeof(line),loci_in) != NULL ){
+		stats[i] = malloc(sizeof(loci_stats));
+		check_mem(stats[i]);
+		stats[i]->chr = malloc(sizeof(char)*2048);
+		check_mem(stats[i]->chr);
+		stats[i]->base_counts = NULL;
+		int check = get_position_info_from_file(line,stats[i],snp6,i);
+		check(check==0,"Error trying to fetch position from file at line %d.",i);
+		check = init_base_counts(stats[i]);
+		check(check==0,"Error initialising base counts %d.",i);
+		i++;
+	}
+	int size = *line_cnt;
+	qsort(stats,size,sizeof(loci_stats*),&sort_loci_stats);
+	fclose(loci_in);
+	return stats;
+	error:
+		if(stats) {
+			int j=0;
+			for(j=0;j<*line_cnt;j++){
+				if(stats[j]){
+					free(stats[j]->chr);
+					free(stats[j]);
+				}
+			}
+			free(stats);
+		}
+		if(loci_in) fclose(loci_in);
+		return NULL;
 }
 
 int main(int argc, char *argv[]){
+	loci_stats **locis = NULL;
 	//Get the options commandline
 	alleleCounter_setup_options(argc,argv);
 	//Set the min base and mapping quality.
@@ -286,7 +373,6 @@ int main(int argc, char *argv[]){
 
 	bam_access_exc_flag(exc_flag);
 
-	FILE *loci_in = NULL;
 	//Open output file for writing
 	FILE *output = fopen(out_file,"w");
   check(output != NULL, "Error opening file %s for write.",out_file);
@@ -297,48 +383,67 @@ int main(int argc, char *argv[]){
 
 	chk = bam_access_openhts(hts_file,ref_file);
 	check(chk == 0,"Error trying to open sequence/index files '%s'.",hts_file);
+	char line[512];
+	int loci_count=0;
+	fprintf(stderr,"Reading locis\n");
+	locis = read_locis_from_file(loci_file,&loci_count);
+	fprintf(stderr,"Done reading locis\n");
 
-  //Open loci file
-  loci_in = fopen(loci_file,"r");
-  check(loci_in != NULL, "Error opening loci file %s for reading.",loci_file);
-
+	check(locis!=NULL,"Error reading loci_stats from file.");
   if(is_dense){
-
-  }else{
-
-
-    char chr[50];
-    int pos;
-    char allele_A;
-    char allele_B;
-    char line[512];
-    int i = 0;
-    while ( fgets(line,sizeof(line),loci_in) != NULL ){
-      i++;
-      int check = get_position_info_from_file(line,chr,&pos,snp6,&allele_A,&allele_B,i);
-      check(check==0,"Error trying to fetch position from file.");
-      if(contig != NULL && strcmp(contig,chr) != 0) continue;
-
-      loci_stats *stats = bam_access_get_position_base_counts(chr,pos);
-      int depth = stats->base_counts[0]+stats->base_counts[1]+stats->base_counts[2]+stats->base_counts[3];
-      int check_print = print_section(output,chr,pos,stats->base_counts[0],
-                  stats->base_counts[1],stats->base_counts[2],stats->base_counts[3],depth,
-                  snp6,allele_A,allele_B);
-      check(check_print>0,"Error printing line to output file: %s: %d.",chr,pos);
-
-		  free(stats);
+		fprintf(stderr,"Multi pos start:\n");
+		int ret = bam_access_get_multi_position_base_counts(locis, loci_count);
+		check(ret==0,"Error scanning through bam file for loci list with dense snps.");
+		/*locis = bam_access_get_position_base_counts_no_fetch(locis,loci_count);
+		check(locis!=NULL,"Error scanning through bam file for loci list with dense snps.");*/
+		int j=0;
+		for(j=0;j<loci_count;j++){
+			int depth = locis[j]->base_counts[0]+locis[j]->base_counts[1]+locis[j]->base_counts[2]+locis[j]->base_counts[3];
+      int check_print = print_section(output,locis[j]->chr,locis[j]->pos,locis[j]->base_counts[0],
+                  locis[j]->base_counts[1],locis[j]->base_counts[2],locis[j]->base_counts[3],depth,
+                  snp6,locis[j]->allele_A,locis[j]->allele_B);
+      check(check_print>0,"Error printing line to output file: %s: %d.",locis[j]->chr,locis[j]->pos);
+			free(locis[j]->chr);
+			if(locis[j]->base_counts) free(locis[j]->base_counts);
+			free(locis[j]);
 		}
+  }else{
+		int j=0;
+		for(j=0;j<loci_count;j++){
+			int ret = bam_access_get_position_base_counts(locis[j]->chr,locis[j]->pos,locis[j]);
+			check(ret==0,"Error retrieving stats from bam file for position %s:%d",locis[j]->chr,locis[j]->pos);
+      int depth = locis[j]->base_counts[0]+locis[j]->base_counts[1]+locis[j]->base_counts[2]+locis[j]->base_counts[3];
+      int check_print = print_section(output,locis[j]->chr,locis[j]->pos,locis[j]->base_counts[0],
+                  locis[j]->base_counts[1],locis[j]->base_counts[2],locis[j]->base_counts[3],depth,
+                  snp6,locis[j]->allele_A,locis[j]->allele_B);
+      check(check_print>0,"Error printing line to output file: %s: %d.",locis[j]->chr,locis[j]->pos);
+
+			free(locis[j]->chr);
+			if(locis[j]->base_counts) free(locis[j]->base_counts);
+			free(locis[j]);
+		}
+		free(locis);
 	}
 
 	//Close files.
-	fclose(loci_in);
+	//fclose(loci_in);
 	bam_access_closehts();
 	fclose(output);
 	return 0;
 
 error:
 	bam_access_closehts();
-	if(loci_in) fclose(loci_in);
+	if(locis){
+		int j=0;
+		for(j=0;j<loci_count;j++){
+				if(locis[j]){
+					free(locis[j]->chr);
+					if(locis[j]->base_counts) free(locis[j]->base_counts);
+					free(locis[j]);
+				}
+		}
+		free(locis);
+	}
 	if(output) fclose(output);
 	if(hts_file) free(hts_file);
 	if(out_file) free(out_file);

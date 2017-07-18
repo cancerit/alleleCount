@@ -65,16 +65,18 @@ int bam_access_openhts(char *hts_file, char *ref_file){
   //Check for generic header read method.
   fholder->head = sam_hdr_read(fholder->in);
 	return 0;
-error:
-  if(fholder->idx) hts_idx_destroy(fholder->idx);
-	if(fholder->in) hts_close(fholder->in);
-	if(fholder) free(fholder);
+		error:
+	  if(fholder->idx) hts_idx_destroy(fholder->idx);
+		if(fholder->in) hts_close(fholder->in);
+		if(fholder->head) bam_hdr_destroy(fholder->head);
+		if(fholder) free(fholder);
 	return -1;
 }
 
 void bam_access_closehts(){
 	if(fholder && fholder->idx) hts_idx_destroy(fholder->idx);
 	if(fholder && fholder->in) hts_close(fholder->in);
+	if(fholder && fholder->head) bam_hdr_destroy(fholder->head);
 	if(fholder) free(fholder);
 	return;
 }
@@ -99,22 +101,142 @@ static int pileup_func(void *data, bam1_t *b){
   return 0;
 }
 
-loci_stats *bam_access_get_position_base_counts(char *chr, int posn){
+void pileupCounts(const bam_pileup1_t *pil, int n_plp, loci_stats *stats){
+	int i=0;
+	for(i=0;i<n_plp;i++){
+		const bam_pileup1_t *p = pil + i;
+		int qual = bam_get_qual(p->b)[p->qpos];
+		uint8_t c = bam_seqi(bam_get_seq(p->b), p->qpos);
+		if(!(p->is_del) &&  qual >= min_base_qual){
+			//&& (c == 1 /*A*/|| c == 2 /*C*/|| c == 4 /*G*/|| c == 8 /*T*/)){
+			//Now we add a new read pos struct to the list since the read is valid.
+			//char cbase = toupper(bam_nt16_rev_table[c]);
+			switch(c){
+				case 1:
+				stats->base_counts[0]++;
+				break;
+
+				case 2:
+				stats->base_counts[1]++;
+				break;
+
+				case 4:
+				stats->base_counts[2]++;
+				break;
+
+				case 8:
+				stats->base_counts[3]++;
+				break;
+
+				default:
+				break;
+
+			}; // End of args switch statement */
+		}
+	}
+	return;
+}
+
+int bam_access_get_multi_position_base_counts(loci_stats **stats, int stats_count){
 	char *region = NULL;
 	hts_itr_t *iter = NULL;
 	bam1_t* b = NULL;
 	bam_plp_t buf;
-	loci_stats *stats = malloc(sizeof(loci_stats *));
-	check_mem(stats);
-	stats->base_counts = malloc(sizeof(int) * 4);
-	check_mem(stats->base_counts);
-	stats->base_counts[0] = 0;
-	stats->base_counts[1] = 0;
-	stats->base_counts[2] = 0;
-	stats->base_counts[3] = 0;
+
+	//Find start and stop for each contig and retrieve a contig at once
+	int start = 0;
+	int stop = 0;
+	char* this_chr;
+	int stop_idx = 0;
+	int start_idx = 0;
+	while(start_idx<stats_count){
+		int i=start_idx;
+		stop = stats[i]->pos;
+		stop_idx = i;
+		this_chr = stats[start_idx]->chr;
+		start = stats[start_idx]->pos;
+		fprintf(stderr,"Start idx  %d for this chr %s\n",start_idx,this_chr);
+		if(i+1<stats_count){
+			i++;
+			//Calculate stop of contig
+			while(strcmp(this_chr,stats[i]->chr)==0){
+				stop = stats[i]->pos;
+				stop_idx = i;
+				i++;
+				if(i==stats_count) break;
+			}
+		}
+		fprintf(stderr,"Stop idx  %d for this chr %s\n",stop_idx,this_chr);
+		region = malloc((sizeof(char *) * (strlen(this_chr)+1))+sizeof(":")+sizeof("-")+(sizeof(char)*((no_of_digits(start)+no_of_digits(stop))+1)));
+		check_mem(region);
+		sprintf(region,"%s:%d-%d",this_chr,start,stop);
+		fprintf(stderr,"REGION: %s\n",region);
+		// initialize pileup
+		buf = bam_plp_init(pileup_func, (void *)fholder);
+		bam_plp_set_maxcnt(buf,maxitercnt);
+		b = bam_init1();
+	  iter = sam_itr_querys(fholder->idx, fholder->head, region);
+		int j=start_idx;
+		int result;
+		const bam_pileup1_t *pl;
+		int tid, pos, n_plp = -1;
+	  while ((result = sam_itr_next(fholder->in, iter, b)) >= 0) {
+	    if(b->core.qual < min_map_qual || (b->core.flag & exc_flag) || (b->core.flag & inc_flag) != inc_flag) continue;
+	    bam_plp_push(buf, b);
+			while ((pl=bam_plp_next(buf, &tid, &pos, &n_plp)) > 0) {
+				if(j==stats_count || pos+1>stats[stop_idx]->pos) break;
+				if(pos+1>stats[j]->pos){
+					while(pos+1>stats[j]->pos){
+						if(j==stop_idx) break;
+						j++;//WE've finished this position, move on (no cvg?)
+						if(j%10000==0) fprintf(stderr,"Index %d\n",j);
+					}
+				}
+				if(pos+1==stats[j]->pos){
+					pileupCounts(pl, n_plp, stats[j]);
+				}
+				if(j==stop_idx) break;
+	    }
+	  }//End of iteration through sam_iter
+		bam_plp_push(buf, 0); // finalize pileup
+		while ((pl=bam_plp_next(buf, &tid, &pos, &n_plp)) > 0) {
+			if(j==stats_count || pos+1>stats[stop_idx]->pos) break;
+			if((pos+1)>stats[j]->pos){
+				while(pos+1>stats[j]->pos){
+					if(j==stop_idx) break;
+					j++;//WE've finished this position, move on (no cvg?)
+					if(j%10000==0) fprintf(stderr,"Index %d\n",j);
+				}
+			}
+			if(pos+1==stats[j]->pos){
+				pileupCounts(pl, n_plp, stats[j]);
+			}
+			if(j==stop_idx) break;
+		}
+		bam_plp_destroy(buf);
+		free(region);
+		bam_destroy1(b);
+		start_idx = stop_idx+1;
+	}
+	return 0;
+	error:
+	if(iter) sam_itr_destroy(iter);
+	if(b) bam_destroy1(b);
+	if(region) free(region);
+	return 1;
+
+
+}
+
+int bam_access_get_position_base_counts(char *chr, int posn, loci_stats *stats){
+	char *region = NULL;
+	hts_itr_t *iter = NULL;
+	bam1_t* b = NULL;
+	bam_plp_t buf;
 	fholder->stats = stats;
 
 	region = malloc((sizeof(char *) * (strlen(chr)+1))+sizeof(":")+sizeof("-")+(sizeof(char)*((no_of_digits(posn)*2)+1)));
+	check_mem(region);
 	sprintf(region,"%s:%d-%d",chr,posn,posn);
 	fholder->beg = posn;
 	fholder->end = posn;
@@ -130,10 +252,8 @@ loci_stats *bam_access_get_position_base_counts(char *chr, int posn){
   b = bam_init1();
   iter = sam_itr_querys(fholder->idx, fholder->head, region);
   int result;
-  int count = 0;
   while ((result = sam_itr_next(fholder->in, iter, b)) >= 0) {
     if(b->core.qual < min_map_qual || (b->core.flag & exc_flag) || (b->core.flag & inc_flag) != inc_flag) continue;
-    count++;
     bam_plp_push(buf, b);
   }
   sam_itr_destroy(iter);
@@ -142,44 +262,13 @@ loci_stats *bam_access_get_position_base_counts(char *chr, int posn){
   const bam_pileup1_t *pil;
   while ( (pil=bam_plp_next(buf, &tid, &pos, &n_plp)) > 0) {
     if((pos+1) != posn) continue;
-    int i=0;
-   	for(i=0;i<n_plp;i++){
-      const bam_pileup1_t *p = pil + i;
-      int qual = bam_get_qual(p->b)[p->qpos];
-      uint8_t c = bam_seqi(bam_get_seq(p->b), p->qpos);
-      if(!(p->is_del) &&  qual >= min_base_qual
-            &&  p->b->core.qual >= min_map_qual){
-           //&& (c == 1 /*A*/|| c == 2 /*C*/|| c == 4 /*G*/|| c == 8 /*T*/)){
-        //Now we add a new read pos struct to the list since the read is valid.
-        //char cbase = toupper(bam_nt16_rev_table[c]);
-        switch(c){
-          case 1:
-            fholder->stats->base_counts[0]++;
-            break;
-
-          case 2:
-            fholder->stats->base_counts[1]++;
-            break;
-
-          case 4:
-            fholder->stats->base_counts[2]++;
-            break;
-
-          case 8:
-            fholder->stats->base_counts[3]++;
-            break;
-
-          default:
-            break;
-
-          }; // End of args switch statement */
-   	    }
-   	  }
+		pileupCounts(pil, n_plp, fholder->stats);
   } //End of iteration through pileup
 	//bam_plp_push(buf, 0); // finalize pileup
   bam_plp_destroy(buf);
 	free(region);
-	return fholder->stats;
+	bam_destroy1(b);
+	return 0;
 
 error:
 	//if(region) free(region);
@@ -190,7 +279,7 @@ error:
 	if(iter) sam_itr_destroy(iter);
 	if(b) bam_destroy1(b);
 	if(region) free(region);
-	return NULL;
+	return 1;
 }
 
 void bam_access_min_base_qual(int qual){
