@@ -57,19 +57,19 @@ int bam_access_openhts(char *hts_file, char *ref_file){
   fholder->idx = sam_index_load(fholder->in,hts_file);
 	check(fholder->idx != 0,"HTS index file for %s failed to open.",hts_file);
 	if(ref_file){
-	  hts_set_fai_filename(fholder->in, ref_file);
+	  int chk = hts_set_fai_filename(fholder->in, ref_file);
+		check(chk==0,"Error setting fai filename %s.",ref_file);
 	}else{
-
 	  if(fholder->in->format.format == cram) log_warn("No reference file provided for a cram input file, if the reference described in the cram header can't be located this script may fail.");
 	}
   //Check for generic header read method.
   fholder->head = sam_hdr_read(fholder->in);
 	return 0;
-		error:
-	  if(fholder->idx) hts_idx_destroy(fholder->idx);
-		if(fholder->in) hts_close(fholder->in);
-		if(fholder->head) bam_hdr_destroy(fholder->head);
-		if(fholder) free(fholder);
+error:
+  if(fholder->idx) hts_idx_destroy(fholder->idx);
+	if(fholder->in) hts_close(fholder->in);
+	if(fholder->head) bam_hdr_destroy(fholder->head);
+	if(fholder) free(fholder);
 	return -1;
 }
 
@@ -155,7 +155,6 @@ int bam_access_get_multi_position_base_counts(loci_stats **stats, int stats_coun
 		stop_idx = i;
 		this_chr = stats[start_idx]->chr;
 		start = stats[start_idx]->pos;
-		fprintf(stderr,"Start idx  %d for this chr %s\n",start_idx,this_chr);
 		if(i+1<stats_count){
 			i++;
 			//Calculate stop of contig
@@ -166,11 +165,9 @@ int bam_access_get_multi_position_base_counts(loci_stats **stats, int stats_coun
 				if(i==stats_count) break;
 			}
 		}
-		fprintf(stderr,"Stop idx  %d for this chr %s\n",stop_idx,this_chr);
 		region = malloc((sizeof(char *) * (strlen(this_chr)+1))+sizeof(":")+sizeof("-")+(sizeof(char)*((no_of_digits(start)+no_of_digits(stop))+1)));
 		check_mem(region);
 		sprintf(region,"%s:%d-%d",this_chr,start,stop);
-		fprintf(stderr,"REGION: %s\n",region);
 		// initialize pileup
 		buf = bam_plp_init(pileup_func, (void *)fholder);
 		bam_plp_set_maxcnt(buf,maxitercnt);
@@ -185,33 +182,27 @@ int bam_access_get_multi_position_base_counts(loci_stats **stats, int stats_coun
 	    bam_plp_push(buf, b);
 			while ((pl=bam_plp_next(buf, &tid, &pos, &n_plp)) > 0) {
 				if(j==stats_count || pos+1>stats[stop_idx]->pos) break;
-				if(pos+1>stats[j]->pos){
-					while(pos+1>stats[j]->pos){
-						if(j==stop_idx) break;
-						j++;//WE've finished this position, move on (no cvg?)
-						if(j%10000==0) fprintf(stderr,"Index %d\n",j);
-					}
+				while(pos+1>stats[j]->pos){
+					if(j==stop_idx) break;
+					j++;//WE've finished this position, move on (no cvg?)
 				}
 				if(pos+1==stats[j]->pos){
 					pileupCounts(pl, n_plp, stats[j]);
 				}
-				if(j==stop_idx) break;
+				if(pos+1>=stats[j]->pos && j==stop_idx) break;
 	    }
 	  }//End of iteration through sam_iter
 		bam_plp_push(buf, 0); // finalize pileup
 		while ((pl=bam_plp_next(buf, &tid, &pos, &n_plp)) > 0) {
 			if(j==stats_count || pos+1>stats[stop_idx]->pos) break;
-			if((pos+1)>stats[j]->pos){
-				while(pos+1>stats[j]->pos){
-					if(j==stop_idx) break;
-					j++;//WE've finished this position, move on (no cvg?)
-					if(j%10000==0) fprintf(stderr,"Index %d\n",j);
-				}
+			while(pos+1>stats[j]->pos){
+				if(j==stop_idx) break;
+				j++;//WE've finished this position, move on (no cvg?)
 			}
 			if(pos+1==stats[j]->pos){
 				pileupCounts(pl, n_plp, stats[j]);
 			}
-			if(j==stop_idx) break;
+			if(pos+1>=stats[j]->pos && j==stop_idx) break;
 		}
 		bam_plp_destroy(buf);
 		free(region);

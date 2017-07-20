@@ -128,7 +128,7 @@ fi
 cd $SETUP_DIR
 
 if [ -e $SETUP_DIR/htslibGet.success ]; then
-  echo -n " already staged ...";
+  echo " already staged ...";
 else
   echo
   cd $SETUP_DIR
@@ -140,7 +140,7 @@ CHK=`perl -le 'eval "require $ARGV[0]" and print $ARGV[0]->VERSION' Bio::DB::HTS
 if [[ "x$CHK" == "x" ]] ; then
   echo -n "Building Bio::DB::HTS ..."
   if [ -e $SETUP_DIR/biohts.success ]; then
-    echo -n " previously installed ...";
+    echo " previously installed ...";
   else
     echo
     cd $SETUP_DIR
@@ -163,12 +163,12 @@ if [[ "x$CHK" == "x" ]] ; then
     touch $SETUP_DIR/biohts.success
   fi
 else
-  echo -n "Bio::DB::HTS already installed ..."
+  echo "Bio::DB::HTS already installed ..."
 fi
 
 echo -n "Building htslib ..."
 if [ -e $SETUP_DIR/htslib.success ]; then
-  echo -n " previously installed ...";
+  echo " previously installed ...";
 else
   echo
   mkdir -p htslib
@@ -186,7 +186,7 @@ export HTSLIB=$INST_PATH
 if [[ ",$COMPILE," == *,samtools,* ]] ; then
   echo -n "Building samtools ..."
   if [ -e $SETUP_DIR/samtools.success ]; then
-    echo -n " previously installed ...";
+    echo " previously installed ...";
   else
   echo
     cd $SETUP_DIR
@@ -210,7 +210,7 @@ export HTSLIB="$SETUP_DIR/htslib"
 
 echo -n "Building alleleCounter ..."
 if [ -e "$SETUP_DIR/alleleCounter.success" ]; then
-  echo -n " previously installed ...";
+  echo " previously installed ...";
 else
   cd $INIT_DIR
   mkdir -p $INIT_DIR/c/bin
