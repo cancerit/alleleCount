@@ -1,5 +1,5 @@
 /**   LICENSE
-* Copyright (c) 2014,2015 Genome Research Ltd.
+* Copyright (c) 2014-2017 Genome Research Ltd.
 *
 * Author: Cancer Genome Project cgpit@sanger.ac.uk
 *
@@ -28,6 +28,10 @@
 
 typedef struct loci_stats{
 	int *base_counts;
+	char *chr;
+	int pos;
+	char allele_A;
+	char allele_B;
 } loci_stats;
 
 typedef struct file_holder{
@@ -42,9 +46,15 @@ void bam_access_min_base_qual(int qual);
 
 void bam_access_min_map_qual(int qual);
 
+void bam_access_inc_flag(int inc);
+
+void bam_access_exc_flag(int exc);
+
 int bam_access_openhts(char *hts_file, char *ref_file);
 
-loci_stats *bam_access_get_position_base_counts(char *chr, int pos);
+int bam_access_get_position_base_counts(char *chr, int pos, loci_stats *stats);
+
+int bam_access_get_multi_position_base_counts(loci_stats **stats, int stats_count);
 
 void bam_access_closehts();
 

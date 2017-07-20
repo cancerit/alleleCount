@@ -16,3 +16,7 @@
 c/src/*.o
 c/tests/*_tests
 c/tests/tests_log
+install_tmp
+install
+test.old
+test.new
