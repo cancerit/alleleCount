@@ -23,7 +23,7 @@
 
 SOURCE_SAMTOOLS="https://github.com/samtools/samtools/releases/download/1.3.1/samtools-1.3.1.tar.bz2"
 SOURCE_HTSLIB="https://github.com/samtools/htslib/releases/download/1.3.2/htslib-1.3.2.tar.bz2"
-BIODBHTS_INSTALL="https://raw.githubusercontent.com/Ensembl/Bio-HTS/master/INSTALL.pl"
+SOURCE_BIOBDHTS="https://github.com/Ensembl/Bio-HTS/archive/2.3.tar.gz"
 
 get_distro () {
   EXT=""
@@ -127,34 +127,90 @@ fi
 
 cd $SETUP_DIR
 
-echo -n "Building samtools ..."
-if [ -e "$SETUP_DIR/samtools.success" ]; then
-  echo -n " previously installed ...";
+if [ -e $SETUP_DIR/htslibGet.success ]; then
+  echo " already staged ...";
 else
+  echo
   cd $SETUP_DIR
-  get_distro "samtools" $SOURCE_SAMTOOLS
-  cd samtools
-  ./configure --enable-plugins --enable-libcurl --prefix=$INST_PATH
-  make all all-htslib
-  make install install-htslib
-  touch $SETUP_DIR/samtools.success
+  get_distro "htslib" $SOURCE_HTSLIB
+  touch $SETUP_DIR/htslibGet.success
+fi
+
+CHK=`perl -le 'eval "require $ARGV[0]" and print $ARGV[0]->VERSION' Bio::DB::HTS`
+if [[ "x$CHK" == "x" ]] ; then
+  echo -n "Building Bio::DB::HTS ..."
+  if [ -e $SETUP_DIR/biohts.success ]; then
+    echo " previously installed ...";
+  else
+    echo
+    cd $SETUP_DIR
+    rm -rf bioDbHts
+    get_distro "bioDbHts" $SOURCE_BIOBDHTS
+    echo ls
+    mkdir -p bioDbHts/htslib
+    tar --strip-components 1 -C bioDbHts -zxf bioDbHts.tar.gz
+    tar --strip-components 1 -C bioDbHts/htslib -jxf $SETUP_DIR/htslib.tar.bz2
+    cd bioDbHts/htslib
+    perl -pi -e 'if($_ =~ m/^CFLAGS/ && $_ !~ m/\-fPIC/i){chomp; s/#.+//; $_ .= " -fPIC -Wno-unused -Wno-unused-result\n"};' Makefile
+    make -j$CPU
+    rm -f libhts.so*
+    cd ../
+    env HTSLIB_DIR=$SETUP_DIR/bioDbHts/htslib perl Build.PL --install_base=$INST_PATH
+    ./Build test
+    ./Build install
+    cd $SETUP_DIR
+    rm -f bioDbHts.tar.gz
+    touch $SETUP_DIR/biohts.success
+  fi
+else
+  echo "Bio::DB::HTS already installed ..."
 fi
 
 echo -n "Building htslib ..."
 if [ -e $SETUP_DIR/htslib.success ]; then
-  echo -n " previously installed ...";
+  echo " previously installed ...";
 else
+  echo
+  mkdir -p htslib
+  tar --strip-components 1 -C htslib -jxf htslib.tar.bz2
+  cd htslib
+  ./configure --enable-plugins --enable-libcurl --prefix=$INST_PATH
+  make -j$CPU
+  make install
   cd $SETUP_DIR
-  get_distro "htslib" $SOURCE_HTSLIB
-  make -C htslib -j$CPU
   touch $SETUP_DIR/htslib.success
+fi
+
+export HTSLIB=$INST_PATH
+
+if [[ ",$COMPILE," == *,samtools,* ]] ; then
+  echo -n "Building samtools ..."
+  if [ -e $SETUP_DIR/samtools.success ]; then
+    echo " previously installed ...";
+  else
+  echo
+    cd $SETUP_DIR
+    rm -rf samtools
+    get_distro "samtools" $SOURCE_SAMTOOLS
+    mkdir -p samtools
+    tar --strip-components 1 -C samtools -xjf samtools.tar.bz2
+    cd samtools
+    ./configure --enable-plugins --enable-libcurl --prefix=$INST_PATH
+    make -j$CPU all all-htslib
+    make install all all-htslib
+    cd $SETUP_DIR
+    rm -f samtools.tar.bz2
+    touch $SETUP_DIR/samtools.success
+  fi
+else
+  echo "samtools - No change between alleleCount versions"
 fi
 
 export HTSLIB="$SETUP_DIR/htslib"
 
 echo -n "Building alleleCounter ..."
 if [ -e "$SETUP_DIR/alleleCounter.success" ]; then
-  echo -n " previously installed ...";
+  echo " previously installed ...";
 else
   cd $INIT_DIR
   mkdir -p $INIT_DIR/c/bin
@@ -162,18 +218,6 @@ else
   cp $INIT_DIR/c/bin/alleleCounter $INST_PATH/bin/.
   make -C c clean
   touch $SETUP_DIR/alleleCounter.success
-fi
-
-CHK=`perl -le 'eval "require $ARGV[0]" and print $ARGV[0]->VERSION' Bio::DB::HTS`
-if [[ "x$CHK" == "x" ]] ; then
-  echo -n "Building Bio::DB::HTS ..."
-  cd $SETUP_DIR
-  # now Bio::DB::HTS
-  get_file "INSTALL.pl" $BIODBHTS_INSTALL
-  perl -I $PERL5LIB INSTALL.pl --prefix $INST_PATH --static
-  rm -f BioDbHTS_INSTALL.pl
-else
-  echo "Bio::DB::HTS already installed"
 fi
 
 cd $INIT_DIR/perl

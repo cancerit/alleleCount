@@ -29,37 +29,53 @@ char *test_bam_access_get_position_base_counts(){
 	//Check with default settings
 	char *chr = "22";
 	int pos = 16165776;
+	loci_stats *stats = malloc(sizeof(loci_stats));
+	stats->pos = pos;
+	stats->chr = chr;
+	stats->base_counts = malloc(sizeof(int) * 4);
+	stats->base_counts[0] = 0;
+	stats->base_counts[1] = 0;
+	stats->base_counts[2] = 0;
+	stats->base_counts[3] = 0;
 	int chk = -1;
 	chk = bam_access_openhts(test_bam,test_ref);
 	check(chk == 0,"Error trying to open bam file '%s'.",test_bam);
-	loci_stats *stats = bam_access_get_position_base_counts(chr,pos);
+	int res = bam_access_get_position_base_counts(chr,pos,stats);
 	mu_assert(stats->base_counts[0]==2,"Check A count 1");
 	mu_assert(stats->base_counts[1]==17,"Check C count 1");
 	mu_assert(stats->base_counts[2]==0,"Check G count 1");
 	mu_assert(stats->base_counts[3]==0,"Check T count 1");
 
 	free(stats->base_counts);
-
+	stats->base_counts = malloc(sizeof(int) * 4);
+	stats->base_counts[0] = 0;
+	stats->base_counts[1] = 0;
+	stats->base_counts[2] = 0;
+	stats->base_counts[3] = 0;
 	int min_bq = 15;
 	bam_access_min_base_qual(min_bq);
-	stats = bam_access_get_position_base_counts(chr,pos);
+	res = bam_access_get_position_base_counts(chr,pos,stats);
 	mu_assert(stats->base_counts[0]==2,"Check A count 2");
 	mu_assert(stats->base_counts[1]==18,"Check C count 2");
 	mu_assert(stats->base_counts[2]==0,"Check G count 2");
 	mu_assert(stats->base_counts[3]==0,"Check T count 2");
 
 	free(stats->base_counts);
-
+	stats->base_counts = malloc(sizeof(int) * 4);
+	stats->base_counts[0] = 0;
+	stats->base_counts[1] = 0;
+	stats->base_counts[2] = 0;
+	stats->base_counts[3] = 0;
 	int min_mq = 15;
 	bam_access_min_map_qual(min_mq);
-	stats = bam_access_get_position_base_counts(chr,pos);
+	res = bam_access_get_position_base_counts(chr,pos,stats);
 	mu_assert(stats->base_counts[0]==2,"Check A count 3");
 	mu_assert(stats->base_counts[1]==24,"Check C count 3");
 	mu_assert(stats->base_counts[2]==0,"Check G count 3");
 	mu_assert(stats->base_counts[3]==0,"Check T count 3");
 
 	free(stats->base_counts);
-
+	free(stats);
 	bam_access_closehts();
 
 	return NULL;
