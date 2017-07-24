@@ -1,3 +1,6 @@
+### v3.3.1
+* Fix setup.sh bug skipping samtools install
+
 ### v3.3.0
 * Added -d commandline option. It triggers 'dense' mode. Best used where there
 * are many SNPs for example AscatNGS and Battenberg allelecount steps
