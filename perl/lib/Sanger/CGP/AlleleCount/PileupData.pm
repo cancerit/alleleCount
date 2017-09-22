@@ -40,18 +40,18 @@ sub new {
   my ($class, $chr, $pos, $allA, $allB) = @_;
   my $self =  { 'chr' => $chr,
                 'pos' => $pos,
-                'depth' => 0,
-                'A' => 0,
-                'C' => 0,
-                'G' => 0,
-                'T' => 0,
+                'depth' => {},
+                'A' => {},
+                'C' => {},
+                'G' => {},
+                'T' => {},
               };
   if(defined $allA) {
     # assume B too
     $self->{'allele_A'} = $allA;
-    $self->{'count_A'} = 0;
+    $self->{'count_A'} = {};
     $self->{'allele_B'} = $allB;
-    $self->{'count_B'} = 0;
+    $self->{'count_B'} = {};
   }
   bless $self, $class;
   return $self;
