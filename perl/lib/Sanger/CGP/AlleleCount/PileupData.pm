@@ -67,7 +67,7 @@ sub pos {
 
 sub residue_count {
   my ($self, $residue) = @_;
-  return $self->{uc $residue};
+  return scalar keys %{$self->{uc $residue}};
 }
 
 sub allele_A {
@@ -83,38 +83,40 @@ sub allele_B {
 }
 
 sub inc_A {
-  shift->{'count_A'}++;
+  my ($self, $qname) = @_;
+  $self->{'count_A'}->{$qname} = 1;
   return 1;
 }
 
 sub inc_B {
-  shift->{'count_B'}++;
+  my ($self, $qname) = @_;
+  $self->{'count_B'}->{$qname} = 1;
   return 1;
 }
 
 sub count_A {
-  return shift->{'count_A'};
+  return scalar keys %{shift->{'count_A'}};
 }
 
 sub count_B {
-  return shift->{'count_B'};
+  return scalar keys %{shift->{'count_B'}};
 }
 
 sub depth {
-  return shift->{'depth'}
+  return scalar keys %{shift->{'depth'}};
 }
 
 sub register_allele {
-  my ($self, $allele) = @_;
+  my ($self, $allele, $qname) = @_;
   $allele = uc $allele;
   if($self->{'allele_A'} && $allele eq $self->{'allele_A'}) {
-    $self->inc_A;
+    $self->inc_A($qname);
   }
   elsif($self->{'allele_B'} && $allele eq $self->{'allele_B'}) {
-    $self->inc_B;
+    $self->inc_B($qname);
   }
-  $self->{$allele}++;
-  $self->{'depth'}++;
+  $self->{$allele}->{$qname} = 1;
+  $self->{'depth'}->{$qname} = 1;
   return 1;
 }
 

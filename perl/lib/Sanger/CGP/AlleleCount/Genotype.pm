@@ -207,7 +207,7 @@ sub allele_counts_callback {
 
     # get the base at this pos
     my $qbase  = substr($a->qseq, $qpos, 1);
-    $g_pu_data->register_allele($qbase);
+    $g_pu_data->register_allele($qbase, $a->query->name);
   }
   return 1;
 }
