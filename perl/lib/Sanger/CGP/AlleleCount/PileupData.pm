@@ -116,7 +116,7 @@ sub register_allele {
     $self->inc_B($qname);
   }
   $self->{$allele}->{$qname} = 1;
-  $self->{'depth'}->{$qname} = 1;
+  $self->{'depth'}->{$qname.'.'.$allele} = 1;
   return 1;
 }
 
