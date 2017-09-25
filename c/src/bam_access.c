@@ -29,7 +29,7 @@
 #include "khash.h"
 
 #define PO10_LIMIT (INT_MAX/10)
-KHASH_SET_INIT_STR(strh,uint8_t)
+KHASH_MAP_INIT_STR(strh,uint8_t)
 
 file_holder *fholder;
 int counter = -1;
