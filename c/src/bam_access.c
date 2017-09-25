@@ -29,7 +29,7 @@
 #include "khash.h"
 
 #define PO10_LIMIT (INT_MAX/10)
-KHASH_SET_INIT_STR(strh)
+KHASH_SET_INIT_STR(strh,uint8_t)
 
 file_holder *fholder;
 int counter = -1;
@@ -105,7 +105,7 @@ static int pileup_func(void *data, bam1_t *b){
 
 void pileupCounts(const bam_pileup1_t *pil, int n_plp, loci_stats *stats){
 	khash_t(strh) *h;
-	khint_t k;
+	khiter_t k;
 	h = kh_init(strh);
 	int i=0;
 	for(i=0;i<n_plp;i++){
@@ -114,7 +114,15 @@ void pileupCounts(const bam_pileup1_t *pil, int n_plp, loci_stats *stats){
 		uint8_t c = bam_seqi(bam_get_seq(p->b), p->qpos);
 		int absent;
     k = kh_put(strh, h, bam_get_qname(p->b), &absent);
-		if(!(p->is_del) &&  qual >= min_base_qual && absent){
+		uint8_t pre_b;
+		if(!absent){ //Read already processed to get base processed (we only increment if base is different between overlapping read pairs)
+			k = kh_get(strh, h, bam_get_qname(p->b));
+			pre_b = kh_val(h,k);
+		}else{
+			//Add the value to the hash
+			kh_value(h, k) = c;
+		}
+		if(!(p->is_del) &&  qual >= min_base_qual && (absent || pre_b != c)){
 			//&& (c == 1 /*A*/|| c == 2 /*C*/|| c == 4 /*G*/|| c == 8 /*T*/)){
 			//Now we add a new read pos struct to the list since the read is valid.
 			//char cbase = toupper(bam_nt16_rev_table[c]);
@@ -139,8 +147,6 @@ void pileupCounts(const bam_pileup1_t *pil, int n_plp, loci_stats *stats){
 				break;
 
 			}; // End of args switch statement */
-			//Add the readname to the hash
-			kh_key(h, k) = bam_get_qname(p->b);
 		}
 	}
 	kh_destroy(strh, h);
