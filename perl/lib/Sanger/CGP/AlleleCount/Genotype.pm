@@ -73,8 +73,8 @@ sub configure {
   my ($self, $bam_file, $min_pbq, $min_mapq, $fasta) = @_;
   my $sam = Bio::DB::HTS->new(-bam => $bam_file, -fasta=> $fasta);
   $sam->max_pileup_cnt($MAX_PILEUP_DEPTH);
-  $g_pb_qual = $min_pbq || $MIN_PBQ;
-  $g_map_qual = $min_mapq || $MIN_MAPQ;
+  $g_pb_qual = defined $min_pbq ? $min_pbq : $MIN_PBQ;
+  $g_map_qual = defined $min_mapq ? $min_mapq : $MIN_MAPQ;
   $g_sam = $sam;
 }
 
