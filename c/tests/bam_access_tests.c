@@ -40,7 +40,7 @@ char *test_bam_access_get_position_base_counts(){
 	int chk = -1;
 	chk = bam_access_openhts(test_bam,test_ref);
 	check(chk == 0,"Error trying to open bam file '%s'.",test_bam);
-	int res = bam_access_get_position_base_counts(chr,pos,stats);
+	int res = bam_access_get_position_base_counts(chr,pos,stats,0,NULL);
 	mu_assert(stats->base_counts[0]==2,"Check A count 1");
 	mu_assert(stats->base_counts[1]==17,"Check C count 1");
 	mu_assert(stats->base_counts[2]==0,"Check G count 1");
@@ -54,7 +54,7 @@ char *test_bam_access_get_position_base_counts(){
 	stats->base_counts[3] = 0;
 	int min_bq = 15;
 	bam_access_min_base_qual(min_bq);
-	res = bam_access_get_position_base_counts(chr,pos,stats);
+	res = bam_access_get_position_base_counts(chr,pos,stats,0,NULL);
 	mu_assert(stats->base_counts[0]==2,"Check A count 2");
 	mu_assert(stats->base_counts[1]==18,"Check C count 2");
 	mu_assert(stats->base_counts[2]==0,"Check G count 2");
@@ -68,7 +68,7 @@ char *test_bam_access_get_position_base_counts(){
 	stats->base_counts[3] = 0;
 	int min_mq = 15;
 	bam_access_min_map_qual(min_mq);
-	res = bam_access_get_position_base_counts(chr,pos,stats);
+	res = bam_access_get_position_base_counts(chr,pos,stats,0,NULL);
 	mu_assert(stats->base_counts[0]==2,"Check A count 3");
 	mu_assert(stats->base_counts[1]==24,"Check C count 3");
 	mu_assert(stats->base_counts[2]==0,"Check G count 3");
