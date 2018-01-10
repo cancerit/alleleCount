@@ -95,7 +95,7 @@ sub _wrap_c_alleleCounter {
       $command .= ' --ref-file='.$self->{'$fasta'};
   }
   if($ENV{ALLELE_C_SILENT}) { #  only used for test harness
-      $command .= ' >& /dev/null'
+      $command .= ' 2> /dev/null'
   }
   system($command) && die $!;
   return;

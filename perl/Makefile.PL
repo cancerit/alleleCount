@@ -28,13 +28,16 @@ WriteMakefile(
   NAME          => 'alleleCount',
   LICENSE       => 'agpl_3', # http://search.cpan.org/~dagolden/CPAN-Meta-2.142690/lib/CPAN/Meta/Spec.pm#license
   VERSION_FROM  => 'lib/Sanger/CGP/AlleleCount.pm',
-  EXE_FILES     => [qw( bin/alleleCounter.pl )],
+  EXE_FILES     => [qw( bin/alleleCounter.pl
+                        bin/alleleCounter_version.pl)],
   PREREQ_PM     => {
                      'Const::Fast' => 0.014,
                      'Try::Tiny' => 0.19,
+                     'File::Slurp' => 9999.19,
                      'File::Which' => 0.05,
                      'Test::Fatal' => 0.013,
                      'Devel::Cover' => 1.09,
-                     'Pod::Coverage' => 0.23
+                     'Pod::Coverage' => 0.23,
+                     'IPC::System::Simple' => 1.25,
                    }
 );
