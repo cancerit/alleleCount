@@ -97,7 +97,6 @@ sub _wrap_c_alleleCounter {
   if($ENV{ALLELE_C_SILENT}) { #  only used for test harness
       $command .= ' >& /dev/null'
   }
-  warn $command;
   system($command) && die $!;
   return;
 }
