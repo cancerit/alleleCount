@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 ##########LICENCE##########
-# Copyright (c) 2014,2015 Genome Research Ltd.
+# Copyright (c) 2014-2018 Genome Research Ltd.
 #
 # Author:  CancerIT <cgpit@sanger.ac.uk>
 #
@@ -23,14 +23,6 @@
 
 
 use strict;
-use Carp;
-use English qw( -no_match_vars );
-use warnings FATAL => 'all';
-
-use Getopt::Long 'GetOptions';
-use Pod::Usage;
-use Const::Fast qw(const);
-
 use Sanger::CGP::AlleleCount;
 
 print Sanger::CGP::AlleleCount->VERSION."\n";
