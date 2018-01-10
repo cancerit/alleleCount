@@ -1,5 +1,5 @@
 ##########LICENCE##########
-# Copyright (c) 2014-2016 Genome Research Ltd.
+# Copyright (c) 2014-2018 Genome Research Ltd.
 #
 # Author: CancerIT <cgpit@sanger.ac.uk>
 #
@@ -23,6 +23,8 @@ use strict;
 use Test::More;
 use Test::Fatal;
 use Const::Fast qw(const);
+use File::Temp qw(tempdir);
+use File::Slurp;
 
 use Sanger::CGP::AlleleCount::Genotype;
 
@@ -57,118 +59,74 @@ my $loci = "$data_root/loci_22.txt";
 my $bad_loci = "$data_root/loci_22_bad.txt";
 my $snp6_loci = "$data_root/loci_snp6.txt";
 
+my $buffer = "";
+my $tmpdir = tempdir( CLEANUP => 1 );
+my $tmp_out = $tmpdir.'/TEST.out';
+$ENV{ALLELE_C_SILENT} = 1; #  silence warnings about missing fastq files on cram data
 
 my $obj = new_ok($MOD); # no options
 $obj = new_ok($MOD, [{'species' => 'HUMAN', 'build' => '37'}]);
 
-
-my $buffer = "";
-my $fh;
-
-open $fh, '>', \$buffer or die $!;
-is(1, $obj->get_full_loci_profile($bam, $fh, $loci), "Check execution of loci profile (BAM)");
-close $fh;
+is(1, $obj->get_full_loci_profile($bam, $tmp_out, $loci), "Check execution of loci profile (BAM)");
+$buffer = read_file($tmp_out);
 is_deeply(tsv_to_data($buffer), \@DEFAULT_RESULT, "Expected result for defaults (BAM)");
 
 # test with default result for C version (-m=20 (bpq))
-$buffer = "";
-open $fh, '>', \$buffer or die $!;
-is(1, $obj->get_full_loci_profile($bam, $fh, $loci, 20), "Check execution of loci profile (BAM, pbq=20)");
-close $fh;
+is(1, $obj->get_full_loci_profile($bam, $tmp_out, $loci, 20), "Check execution of loci profile (BAM, pbq=20)");
+$buffer = read_file($tmp_out);
 is_deeply(tsv_to_data($buffer), \@PBQ20_RESULT, "Expected result for defaults (BAM, pbq=20)");
 
 # test with mapq=1
-$buffer = "";
-open $fh, '>', \$buffer or die $!;
-is(1, $obj->get_full_loci_profile($bam, $fh, $loci, undef, 1), "Check execution of loci profile (BAM, mapq=1)");
-close $fh;
+is(1, $obj->get_full_loci_profile($bam, $tmp_out, $loci, undef, 1), "Check execution of loci profile (BAM, mapq=1)");
+$buffer = read_file($tmp_out);
 is_deeply(tsv_to_data($buffer), \@MAPQ0_RESULT, "Expected result for defaults (BAM, mapq=1)");
 
 ## do again with SNP6
 
-$buffer = "";
-open $fh, '>', \$buffer or die $!;
-is(1, $obj->get_full_snp6_profile($bam, $fh, $snp6_loci), "Check execution of snp6 loci profile (BAM)");
-close $fh;
+is(1, $obj->get_full_snp6_profile($bam, $tmp_out, $snp6_loci), "Check execution of snp6 loci profile (BAM)");
+$buffer = read_file($tmp_out);
 is_deeply(tsv_to_data($buffer), \@DEFAULT_RESULT_SNP6, "Expected result for defaults (BAM)");
 
 # test with default result for C version (-m=20 (bpq))
-$buffer = "";
-open $fh, '>', \$buffer or die $!;
-is(1, $obj->get_full_snp6_profile($bam, $fh, $snp6_loci, 20), "Check execution of snp6 loci profile (BAM, pbq=20)");
-close $fh;
+is(1, $obj->get_full_snp6_profile($bam, $tmp_out, $snp6_loci, 20), "Check execution of snp6 loci profile (BAM, pbq=20)");
+$buffer = read_file($tmp_out);
 is_deeply(tsv_to_data($buffer), \@PBQ20_RESULT_SNP6, "Expected result for defaults (BAM, pbq=20)");
 
 # test with mapq=1
-$buffer = "";
-open $fh, '>', \$buffer or die $!;
-is(1, $obj->get_full_snp6_profile($bam, $fh, $snp6_loci, undef, 1), "Check execution of snp6 loci profile (BAM, mapq=1)");
-close $fh;
-is_deeply(tsv_to_data($buffer), \@MAPQ0_RESULT_SNP6, "Expected result for defaults (BAM, mapq=1)");
+is(1, $obj->get_full_snp6_profile($bam, $tmp_out, $snp6_loci, undef, 1), "Check execution of snp6 loci profile (BAM, mapq=1)");
+$buffer = read_file($tmp_out);
+is_deeply(tsv_to_data($buffer), \@MAPQ0_RESULT_SNP6, "Expected result for defaults (BAM, mapq>0)");
 
-
-# check fails with expected error message when seq not found in BAM
-$buffer = "";
-open $fh, '>', \$buffer or die $!;
-like(
-    exception { $obj->get_full_loci_profile($bam, $fh, $bad_loci); },
-    qr/Chromosome '[^']+' at line [[:digit:]]+ in .+ cannot be found in .+[.]bam/,
-    "Catch loci file with unknown sequences vs. BAM header",
-  );
-close $fh;
 
 ### !!! The test cram file has the reference embedded so works fine without fasta !!! ###
-$buffer = "";
-open $fh, '>', \$buffer or die $!;
-is(1, $obj->get_full_loci_profile($cram, $fh, $loci), "Check execution of loci profile (CRAM)");
-close $fh;
+is(1, $obj->get_full_loci_profile($cram, $tmp_out, $loci), "Check execution of loci profile (CRAM)");
+$buffer = read_file($tmp_out);
 is_deeply(tsv_to_data($buffer), \@DEFAULT_RESULT, "Expected result for defaults (CRAM)");
 
 # test with default result for C version (-m=20 (bpq))
-$buffer = "";
-open $fh, '>', \$buffer or die $!;
-is(1, $obj->get_full_loci_profile($cram, $fh, $loci, 20), "Check execution of loci profile (CRAM, pbq=20)");
-close $fh;
+is(1, $obj->get_full_loci_profile($cram, $tmp_out, $loci, 20), "Check execution of loci profile (CRAM, pbq=20)");
+$buffer = read_file($tmp_out);
 is_deeply(tsv_to_data($buffer), \@PBQ20_RESULT, "Expected result for defaults (CRAM, pbq=20)");
 
 # test with mapq=1
-$buffer = "";
-open $fh, '>', \$buffer or die $!;
-is(1, $obj->get_full_loci_profile($cram, $fh, $loci, undef, 1), "Check execution of loci profile (CRAM, mapq=1)");
-close $fh;
+is(1, $obj->get_full_loci_profile($cram, $tmp_out, $loci, undef, 1), "Check execution of loci profile (CRAM, mapq=1)");
+$buffer = read_file($tmp_out);
 is_deeply(tsv_to_data($buffer), \@MAPQ0_RESULT, "Expected result for defaults (CRAM, mapq=1)");
 
 ## do again with SNP6
-
-$buffer = "";
-open $fh, '>', \$buffer or die $!;
-is(1, $obj->get_full_snp6_profile($cram, $fh, $snp6_loci), "Check execution of snp6 loci profile (CRAM)");
-close $fh;
+is(1, $obj->get_full_snp6_profile($cram, $tmp_out, $snp6_loci), "Check execution of snp6 loci profile (CRAM)");
+$buffer = read_file($tmp_out);
 is_deeply(tsv_to_data($buffer), \@DEFAULT_RESULT_SNP6, "Expected result for defaults (CRAM)");
 
 # test with default result for C version (-m=20 (bpq))
-$buffer = "";
-open $fh, '>', \$buffer or die $!;
-is(1, $obj->get_full_snp6_profile($cram, $fh, $snp6_loci, 20), "Check execution of snp6 loci profile (CRAM, pbq=20)");
-close $fh;
+is(1, $obj->get_full_snp6_profile($cram, $tmp_out, $snp6_loci, 20), "Check execution of snp6 loci profile (CRAM, pbq=20)");
+$buffer = read_file($tmp_out);
 is_deeply(tsv_to_data($buffer), \@PBQ20_RESULT_SNP6, "Expected result for defaults (CRAM, pbq=20)");
 
 # test with mapq=1
-$buffer = "";
-open $fh, '>', \$buffer or die $!;
-is(1, $obj->get_full_snp6_profile($cram, $fh, $snp6_loci, undef, 1), "Check execution of snp6 loci profile (CRAM, mapq=1)");
-close $fh;
+is(1, $obj->get_full_snp6_profile($cram, $tmp_out, $snp6_loci, undef, 1), "Check execution of snp6 loci profile (CRAM, mapq=1)");
+$buffer = read_file($tmp_out);
 is_deeply(tsv_to_data($buffer), \@MAPQ0_RESULT_SNP6, "Expected result for defaults (CRAM, mapq=1)");
-
-# check fails with expected error message when seq not found in CRAM
-$buffer = "";
-open $fh, '>', \$buffer or die $!;
-like(
-    exception { $obj->get_full_loci_profile($cram, $fh, $bad_loci); },
-    qr/Chromosome '[^']+' at line [[:digit:]]+ in .+ cannot be found in .+[.]cram/,
-    "Catch loci file with unknown sequences vs. CRAM header",
-  );
-close $fh;
 
 done_testing();
 
