@@ -1,5 +1,4 @@
-alleleCount
-===========
+# alleleCount
 
 The alleleCount package primarily exists to prevent code duplication between some other projects,
 specifically AscatNGS and Battenburg.
@@ -25,13 +24,12 @@ The file doesn't need to be in any particular order (although disk reads are lik
 
 ---
 
-###Dependencies/Install
+### Dependencies/Install
 
 Some of the code included in this package has dependencies:
 
 * [samtools v1.2+](https://github.com/samtools/samtools)
 * [htslib](https://github.com/samtools/htslib)
-* [Bio::DB::HTS](http://search.cpan.org/~rishidev/Bio-DB-HTS/)
 
 And various utility perl modules.
 
@@ -43,12 +41,15 @@ Please be aware that this expects basic C compilation libraries and tools to be 
 
 ---
 
-##Creating a release
-####Preparation
+## Creating a release
+
+### Preparation
+
 * Commit/push all relevant changes.
 * Pull a clean version of the repo and use this for the following steps.
 
-####Cutting the release
+### Cutting the release
+
 1. Update `lib/Sanger/CGP/AlleleCount.pm` to the correct version.
 2. Update `CHANGES.md` to show major items.
 3. Run `./prerelease.sh`
@@ -57,10 +58,10 @@ Please be aware that this expects basic C compilation libraries and tools to be 
 6. Push commits.
 7. Use the GitHub tools to draft a release.
 
-LICENCE
-=======
+## LICENCE
 
-Copyright (c) 2014-2016 Genome Research Ltd.
+```
+Copyright (c) 2014-2018 Genome Research Ltd.
 
 Author: CancerIT <cgpit@sanger.ac.uk>
 
@@ -88,3 +89,4 @@ reads ‘Copyright (c) 2005, 2007, 2008, 2009, 2011, 2012’ and a copyright
 statement that reads ‘Copyright (c) 2005-2012’ should be interpreted as being
 identical to a statement that reads ‘Copyright (c) 2005, 2006, 2007, 2008,
 2009, 2010, 2011, 2012’."
+```

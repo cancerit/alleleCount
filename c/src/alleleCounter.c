@@ -1,5 +1,5 @@
 /**   LICENSE
-* Copyright (c) 2014-2017 Genome Research Ltd.
+* Copyright (c) 2014-2018 Genome Research Ltd.
 *
 * Author: Cancer Genome Project cgpit@sanger.ac.uk
 *
@@ -88,8 +88,8 @@ void alleleCounter_setup_options(int argc, char *argv[]){
 							{"is-snp6", required_argument, 0, 's'},
 							{"contig", required_argument, 0, 'c'},
 							{"dense-snps", no_argument, 0, 'd'},
-							{"required-flag", no_argument, 0, 'f'},
-							{"filtered-flag", no_argument, 0, 'F'},
+							{"required-flag", optional_argument, 0, 'f'},
+							{"filtered-flag", optional_argument, 0, 'F'},
 							{"version", no_argument, 0, 'v'},
              	{"help", no_argument, 0, 'h'},
              	{ NULL, 0, NULL, 0}

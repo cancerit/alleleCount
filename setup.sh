@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ##########LICENCE##########
-# Copyright (c) 2014-2017 Genome Research Ltd.
+# Copyright (c) 2014-2018 Genome Research Ltd.
 #
 # Author: CancerIT <cgpit@sanger.ac.uk>
 #
@@ -23,7 +23,6 @@
 
 SOURCE_SAMTOOLS="https://github.com/samtools/samtools/releases/download/1.3.1/samtools-1.3.1.tar.bz2"
 SOURCE_HTSLIB="https://github.com/samtools/htslib/releases/download/1.3.2/htslib-1.3.2.tar.bz2"
-SOURCE_BIOBDHTS="https://github.com/Ensembl/Bio-HTS/archive/2.3.tar.gz"
 
 EXP_SAMV="1.3.1"
 
@@ -124,7 +123,7 @@ CPANM=`which cpanm`
 if [ -e $SETUP_DIR/basePerlDeps.success ]; then
   echo "Previously installed base perl deps..."
 else
-  perlmods=( "ExtUtils::CBuilder" "Module::Build~0.42" "File::ShareDir" "File::ShareDir::Install" "Const::Fast" "File::Which" "LWP::UserAgent" "Bio::Root::Version@1.006924")
+  perlmods=( "ExtUtils::CBuilder" "Module::Build~0.42" "Const::Fast" "File::Which" "LWP::UserAgent")
   for i in "${perlmods[@]}" ; do
     $CPANM --no-interactive --notest --mirror http://cpan.metacpan.org -l $INST_PATH $i
   done
@@ -140,36 +139,6 @@ else
   cd $SETUP_DIR
   get_distro "htslib" $SOURCE_HTSLIB
   touch $SETUP_DIR/htslibGet.success
-fi
-
-CHK=`perl -le 'eval "require $ARGV[0]" and print $ARGV[0]->VERSION' Bio::DB::HTS`
-if [[ "x$CHK" == "x" ]] ; then
-  echo -n "Building Bio::DB::HTS ..."
-  if [ -e $SETUP_DIR/biohts.success ]; then
-    echo " previously installed ...";
-  else
-    echo
-    cd $SETUP_DIR
-    rm -rf bioDbHts
-    get_distro "bioDbHts" $SOURCE_BIOBDHTS
-    echo ls
-    mkdir -p bioDbHts/htslib
-    tar --strip-components 1 -C bioDbHts -zxf bioDbHts.tar.gz
-    tar --strip-components 1 -C bioDbHts/htslib -jxf $SETUP_DIR/htslib.tar.bz2
-    cd bioDbHts/htslib
-    perl -pi -e 'if($_ =~ m/^CFLAGS/ && $_ !~ m/\-fPIC/i){chomp; s/#.+//; $_ .= " -fPIC -Wno-unused -Wno-unused-result\n"};' Makefile
-    make -j$CPU
-    rm -f libhts.so*
-    cd ../
-    env HTSLIB_DIR=$SETUP_DIR/bioDbHts/htslib perl Build.PL --install_base=$INST_PATH
-    ./Build test
-    ./Build install
-    cd $SETUP_DIR
-    rm -f bioDbHts.tar.gz
-    touch $SETUP_DIR/biohts.success
-  fi
-else
-  echo "Bio::DB::HTS already installed ..."
 fi
 
 echo -n "Building htslib ..."
@@ -244,9 +213,9 @@ if [ -e "$SETUP_DIR/alleleCounter.success" ]; then
 else
   cd $INIT_DIR
   mkdir -p $INIT_DIR/c/bin
+  make -C c clean
   make -C c -j$CPU
   cp $INIT_DIR/c/bin/alleleCounter $INST_PATH/bin/.
-  make -C c clean
   touch $SETUP_DIR/alleleCounter.success
 fi
 
