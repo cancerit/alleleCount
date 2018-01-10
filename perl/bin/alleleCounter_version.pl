@@ -23,6 +23,8 @@
 
 
 use strict;
+use FindBin qw($Bin);
+use lib "$Bin/../lib";
 use Sanger::CGP::AlleleCount;
 
 print Sanger::CGP::AlleleCount->VERSION."\n";
