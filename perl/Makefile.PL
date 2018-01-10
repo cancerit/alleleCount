@@ -37,6 +37,7 @@ WriteMakefile(
                      'File::Which' => 0.05,
                      'Test::Fatal' => 0.013,
                      'Devel::Cover' => 1.09,
-                     'Pod::Coverage' => 0.23
+                     'Pod::Coverage' => 0.23,
+                     'IPC::System::Simple' => 1.25,
                    }
 );
