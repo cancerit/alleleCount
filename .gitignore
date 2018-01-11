@@ -15,6 +15,7 @@
 /c/bin/*
 c/src/*.o
 c/tests/*_tests
+c/tests/*_tests.dSYM
 c/tests/tests_log
 install_tmp
 install
