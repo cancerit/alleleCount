@@ -1,13 +1,13 @@
 # alleleCount
 
 The alleleCount package primarily exists to prevent code duplication between some other projects,
-specifically AscatNGS and Battenburg.
+specifically AscatNGS and Battenberg.
 
 | Master | Dev |
 |---|---|
 | [![Build Status](https://travis-ci.org/cancerit/alleleCount.svg?branch=master)](https://travis-ci.org/cancerit/alleleCount) | [![Build Status](https://travis-ci.org/cancerit/alleleCount.svg?branch=dev)](https://travis-ci.org/cancerit/alleleCount) |
 
-The project contains 2 equivalent implementations of allele counting code in perl and C for BAM/CRAM processing.
+The project previously contained 2 equivalent implementations of allele counting code in perl and C for BAM/CRAM processing. The perl code now wraps the C implementation in order to preserve the ability to use alleleCounter for those still using the perl implementation whilst using the speed of the C implementation with the added benefit of alleleCounter no longer requiring samtools or Bio::DB::HTS.
 
 ## Loci File
 
@@ -28,7 +28,6 @@ The file doesn't need to be in any particular order (although disk reads are lik
 
 Some of the code included in this package has dependencies:
 
-* [samtools v1.2+](https://github.com/samtools/samtools)
 * [htslib](https://github.com/samtools/htslib)
 
 And various utility perl modules.
