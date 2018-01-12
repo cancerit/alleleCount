@@ -28,4 +28,3 @@ script:
  - ./setup.sh $HOME/wtsi-opt
  - ls -l $HOME/wtsi-opt/bin/alleleCounter
  - ls -l $HOME/wtsi-opt/bin/alleleCounter.pl
- - ls -l $HOME/wtsi-opt/bin/alleleCounter_version.pl
