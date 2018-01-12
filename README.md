@@ -7,20 +7,60 @@ specifically AscatNGS and Battenberg.
 |---|---|
 | [![Build Status](https://travis-ci.org/cancerit/alleleCount.svg?branch=master)](https://travis-ci.org/cancerit/alleleCount) | [![Build Status](https://travis-ci.org/cancerit/alleleCount.svg?branch=dev)](https://travis-ci.org/cancerit/alleleCount) |
 
-The project previously contained 2 equivalent implementations of allele counting code in perl and C for BAM/CRAM processing. The perl code now wraps the C implementation in order to preserve the ability to use alleleCounter for those still using the perl implementation whilst using the speed of the C implementation with the added benefit of alleleCounter no longer requiring samtools or Bio::DB::HTS.
+The project previously contained 2 equivalent implementations of allele counting code in perl and C
+for BAM/CRAM processing.  As of v4 the perl code wraps the C implementation in order to preserve the
+ability to use alleleCounter for those still using the perl implementation whilst using the speed of
+the C implementation without loosing the additional features it provides.
 
-## Loci File
+## Usage
 
-The input for both tools is a simple tab formatted file of chromosome and 1-based positions, e.g.
+Assuming you have added the installation location to your path:
+
+### C version
+
+Accepts locai file as described below only and generates a tsv output of allele counts.
+
+For parameters please see the command line help:
 
 ```
-<CHR><TAB><POS1>
-<CHR><TAB><POS2>
-<CHR><TAB><POS3>
+alleleCounter --help
+```
+
+Please note use of the long form parameter names with values requires '=', e.g. `--min-base-qual=10`.
+
+### Perl version
+
+The perl version has additional options for alternative typs of input/output.
+
+```
+alleleCounter.pl --help
+```
+
+## Loci files
+
+### Generic loci File
+
+The base input for both tools is a simple tab formatted file of chromosome and 1-based positions, e.g.
+
+```
+<CHR><tab><POS1>
 ...
 ```
 
-The file doesn't need to be in any particular order (although disk reads are likely to be more efficient when sorted).
+If using the `--dense-snps` mode (C only) please ensure the file is sorted via:
+
+```
+sort -k1,1 -n 2,2n loci_unsrt.tsv > losi_sorted.tsv
+```
+
+### SNP6 loci file (perl only)
+
+```
+<CHR><tab><POS1><tab><REF_ALL><tab><ID><tab><ALLELE_A><tab><ALLELE_B>
+...
+```
+
+Output file is different.
 
 ---
 
