@@ -4,6 +4,7 @@
 
 * Reworked perl to wrap C alleleCounter and just handle the extra format changes.
 * No dep on Bio::DB::HTS now.
+* Update to HTSlib 1.7
 
 ## v3.3.1
 
