@@ -37,6 +37,7 @@ static char *contig = NULL;
 static int inc_flag = 3; //Paired, proper pair
 static int exc_flag = 3852; // Read unmapped, Mate unmapped, Secondary alignment, Fails QC, Duplicate, Supplementary alignment
 static int snp6 = 0;
+static int is_10x = 0;
 static int is_dense = 0;
 
 int check_exist(char *fname){
@@ -62,6 +63,7 @@ void alleleCounter_print_usage (int exit_code){
 	printf (" -q  --min-map-qual [int]        Minimum mapping quality [Default: %d].\n",min_map_q);
 	printf (" -c  --contig [string]           Limit calling to named contig.\n");
 	printf (" -d  --dense-snps                Improves performance where many positions are close together \n");
+	printf (" -x  --is-10x                    Enables 10X processing mode.  In this mode the HTS input file must be a cellranger produced BAM file.  Allele counts are then given on a per-cellular barcode basis, with each count representing the consensus base for that UMI. \n");
 	printf ("                                 by iterating through bam file rather than using a 'fetch' approach.\n");
 	printf (" -f  --required-flag [int]       Flag value of reads to retain in allele counting default: [%i].\n",inc_flag);
 	printf (" -F  --filtered-flag [int]       Flag value of reads to exclude in allele counting default: [%i].\n",exc_flag);
@@ -86,6 +88,7 @@ void alleleCounter_setup_options(int argc, char *argv[]){
              	{"min-base-qual", required_argument, 0, 'm'},
 							{"min-map-qual", required_argument, 0, 'q'},
 							{"is-snp6", required_argument, 0, 's'},
+							{"is-10x", required_argument, 0, 'x'},
 							{"contig", required_argument, 0, 'c'},
 							{"dense-snps", no_argument, 0, 'd'},
 							{"required-flag", optional_argument, 0, 'f'},
@@ -99,7 +102,7 @@ void alleleCounter_setup_options(int argc, char *argv[]){
    int iarg = 0;
 
    //Iterate through options
-   while((iarg = getopt_long(argc, argv, "f:F:l:b:m:o:q:r:c:hdsv", long_opts, &index)) != -1){
+   while((iarg = getopt_long(argc, argv, "f:F:l:b:m:o:q:r:c:hdsvx", long_opts, &index)) != -1){
    	switch(iarg){
    		  case 'h':
          	alleleCounter_print_usage(0);
@@ -136,6 +139,10 @@ void alleleCounter_setup_options(int argc, char *argv[]){
       	case 's':
       		snp6 = 1;
       		break;
+
+         case 'x':
+            is_10x = 1;
+            break;
 
       	case 'c':
       	  contig = optarg;
@@ -191,10 +198,17 @@ int print_snp6_header(FILE *output){
 	return chk;
 }
 
+int print_10x_header(FILE *output){
+	int chk = fprintf(output,"#CHR\tPOS\tBarcode\tCount_A\tCount_C\tCount_G\tCount_T\tGood_depth\n");
+   return chk;
+}
+
 int print_header(FILE *output, int snp6){
 	if(snp6 == 1){
 		return print_snp6_header(output);
-	}else{
+	}else if(is_10x == 1){
+     return print_10x_header(output);
+   }else{
 		return print_loci_head(output);
 	}
 }
@@ -383,47 +397,64 @@ int main(int argc, char *argv[]){
 
 	chk = bam_access_openhts(hts_file,ref_file);
 	check(chk == 0,"Error trying to open sequence/index files '%s'.",hts_file);
-	char line[512];
 	int loci_count=0;
 	fprintf(stderr,"Reading locis\n");
 	locis = read_locis_from_file(loci_file,&loci_count);
 	fprintf(stderr,"Done reading locis\n");
 
 	check(locis!=NULL,"Error reading loci_stats from file.");
-  if(is_dense){
-		fprintf(stderr,"Multi pos start:\n");
-		int ret = bam_access_get_multi_position_base_counts(locis, loci_count);
-		check(ret==0,"Error scanning through bam file for loci list with dense snps.");
-		/*locis = bam_access_get_position_base_counts_no_fetch(locis,loci_count);
-		check(locis!=NULL,"Error scanning through bam file for loci list with dense snps.");*/
-		int j=0;
-		for(j=0;j<loci_count;j++){
-			int depth = locis[j]->base_counts[0]+locis[j]->base_counts[1]+locis[j]->base_counts[2]+locis[j]->base_counts[3];
-      int check_print = print_section(output,locis[j]->chr,locis[j]->pos,locis[j]->base_counts[0],
-                  locis[j]->base_counts[1],locis[j]->base_counts[2],locis[j]->base_counts[3],depth,
-                  snp6,locis[j]->allele_A,locis[j]->allele_B);
-      check(check_print>0,"Error printing line to output file: %s: %d.",locis[j]->chr,locis[j]->pos);
-			free(locis[j]->chr);
-			if(locis[j]->base_counts) free(locis[j]->base_counts);
-			free(locis[j]);
-		}
-  }else{
-		int j=0;
-		for(j=0;j<loci_count;j++){
-			int ret = bam_access_get_position_base_counts(locis[j]->chr,locis[j]->pos,locis[j]);
-			check(ret==0,"Error retrieving stats from bam file for position %s:%d",locis[j]->chr,locis[j]->pos);
-      int depth = locis[j]->base_counts[0]+locis[j]->base_counts[1]+locis[j]->base_counts[2]+locis[j]->base_counts[3];
-      int check_print = print_section(output,locis[j]->chr,locis[j]->pos,locis[j]->base_counts[0],
-                  locis[j]->base_counts[1],locis[j]->base_counts[2],locis[j]->base_counts[3],depth,
-                  snp6,locis[j]->allele_A,locis[j]->allele_B);
-      check(check_print>0,"Error printing line to output file: %s: %d.",locis[j]->chr,locis[j]->pos);
-
-			free(locis[j]->chr);
-			if(locis[j]->base_counts) free(locis[j]->base_counts);
-			free(locis[j]);
-		}
-		free(locis);
-	}
+   if(is_10x){
+     fprintf(stderr,"Using 10X processing mode.\n");
+     if(!is_dense){
+		  int j=0;
+		  for(j=0;j<loci_count;j++){
+		  	int ret = bam_access_get_position_base_counts(locis[j]->chr,locis[j]->pos,locis[j],is_10x,output);
+		  	check(ret==0,"Error retrieving stats from bam file for position %s:%d",locis[j]->chr,locis[j]->pos);
+		  	free(locis[j]->chr);
+		  	if(locis[j]->base_counts) free(locis[j]->base_counts);
+		  	free(locis[j]);
+        }
+     }else{
+  		 fprintf(stderr,"Multi pos start:\n");
+  		 int ret = bam_access_get_multi_position_base_counts(locis, loci_count,is_10x,output);
+  		 check(ret==0,"Error scanning through bam file for loci list with dense snps.");
+     }
+   }else{
+    if(is_dense){
+  		fprintf(stderr,"Multi pos start:\n");
+  		int ret = bam_access_get_multi_position_base_counts(locis, loci_count,is_10x,output);
+  		check(ret==0,"Error scanning through bam file for loci list with dense snps.");
+  		/*locis = bam_access_get_position_base_counts_no_fetch(locis,loci_count);
+  		check(locis!=NULL,"Error scanning through bam file for loci list with dense snps.");*/
+  		int j=0;
+  		for(j=0;j<loci_count;j++){
+  			int depth = locis[j]->base_counts[0]+locis[j]->base_counts[1]+locis[j]->base_counts[2]+locis[j]->base_counts[3];
+        int check_print = print_section(output,locis[j]->chr,locis[j]->pos,locis[j]->base_counts[0],
+                    locis[j]->base_counts[1],locis[j]->base_counts[2],locis[j]->base_counts[3],depth,
+                    snp6,locis[j]->allele_A,locis[j]->allele_B);
+        check(check_print>0,"Error printing line to output file: %s: %d.",locis[j]->chr,locis[j]->pos);
+  			free(locis[j]->chr);
+  			if(locis[j]->base_counts) free(locis[j]->base_counts);
+  			free(locis[j]);
+  		}
+    }else{
+  		int j=0;
+  		for(j=0;j<loci_count;j++){
+  			int ret = bam_access_get_position_base_counts(locis[j]->chr,locis[j]->pos,locis[j],is_10x,output);
+  			check(ret==0,"Error retrieving stats from bam file for position %s:%d",locis[j]->chr,locis[j]->pos);
+        int depth = locis[j]->base_counts[0]+locis[j]->base_counts[1]+locis[j]->base_counts[2]+locis[j]->base_counts[3];
+        int check_print = print_section(output,locis[j]->chr,locis[j]->pos,locis[j]->base_counts[0],
+                    locis[j]->base_counts[1],locis[j]->base_counts[2],locis[j]->base_counts[3],depth,
+                    snp6,locis[j]->allele_A,locis[j]->allele_B);
+        check(check_print>0,"Error printing line to output file: %s: %d.",locis[j]->chr,locis[j]->pos);
+  
+  			free(locis[j]->chr);
+  			if(locis[j]->base_counts) free(locis[j]->base_counts);
+  			free(locis[j]);
+  		}
+  		free(locis);
+  	 }
+   }
 
 	//Close files.
 	//fclose(loci_in);
