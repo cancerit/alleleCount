@@ -58,12 +58,16 @@ void alleleCounter_print_usage (int exit_code){
 
 	printf ("Optional\n");
 	printf (" -r  --ref-file [file]           Path to reference fasta index file.\n");
-	printf ("                                 NB. If cram format is supplied via -b and the reference listed in the cram header can't be found alleleCounter may fail to work correctly.\n");
+	printf ("                                 NB. If cram format is supplied via -b and the reference listed in the cram header\n");
+	printf ("                                     can't be found alleleCounter may fail to work correctly.\n");
 	printf (" -m  --min-base-qual [int]       Minimum base quality [Default: %d].\n",min_base_q);
 	printf (" -q  --min-map-qual [int]        Minimum mapping quality [Default: %d].\n",min_map_q);
 	printf (" -c  --contig [string]           Limit calling to named contig.\n");
 	printf (" -d  --dense-snps                Improves performance where many positions are close together \n");
-	printf (" -x  --is-10x                    Enables 10X processing mode.  In this mode the HTS input file must be a cellranger produced BAM file.  Allele counts are then given on a per-cellular barcode basis, with each count representing the consensus base for that UMI. \n");
+	printf (" -x  --is-10x                    Enables 10X processing mode.\n");
+	printf ("                                   In this mode the HTS input file must be a cellranger produced BAM file.  Allele\n");
+	printf ("                                   counts are then given on a per-cellular barcode basis, with each count representing\n");
+	printf ("                                   the consensus base for that UMI. \n");
 	printf ("                                 by iterating through bam file rather than using a 'fetch' approach.\n");
 	printf (" -f  --required-flag [int]       Flag value of reads to retain in allele counting default: [%i].\n",inc_flag);
 	printf (" -F  --filtered-flag [int]       Flag value of reads to exclude in allele counting default: [%i].\n",exc_flag);
@@ -447,7 +451,7 @@ int main(int argc, char *argv[]){
                     locis[j]->base_counts[1],locis[j]->base_counts[2],locis[j]->base_counts[3],depth,
                     snp6,locis[j]->allele_A,locis[j]->allele_B);
         check(check_print>0,"Error printing line to output file: %s: %d.",locis[j]->chr,locis[j]->pos);
-  
+
   			free(locis[j]->chr);
   			if(locis[j]->base_counts) free(locis[j]->base_counts);
   			free(locis[j]);
