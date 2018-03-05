@@ -6,6 +6,7 @@
 * Reworked perl to wrap C alleleCounter and just handle the extra format changes.
 * No dep on Bio::DB::HTS now.
 * Update to HTSlib 1.7
+* Merged #43, providing 10X processing mode.
 
 ## v3.3.1
 

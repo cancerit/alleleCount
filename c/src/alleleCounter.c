@@ -95,8 +95,8 @@ void alleleCounter_setup_options(int argc, char *argv[]){
 							{"is-10x", required_argument, 0, 'x'},
 							{"contig", required_argument, 0, 'c'},
 							{"dense-snps", no_argument, 0, 'd'},
-							{"required-flag", optional_argument, 0, 'f'},
-							{"filtered-flag", optional_argument, 0, 'F'},
+							{"required-flag", required_argument, 0, 'f'},
+							{"filtered-flag", required_argument, 0, 'F'},
 							{"version", no_argument, 0, 'v'},
              	{"help", no_argument, 0, 'h'},
              	{ NULL, 0, NULL, 0}
