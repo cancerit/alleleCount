@@ -30,7 +30,7 @@ Please note use of the long form parameter names with values requires '=', e.g. 
 
 ### Perl version
 
-The perl version has additional options for alternative typs of input/output.
+The perl version has additional options for alternative types of input/output.
 
 ```
 alleleCounter.pl --help
@@ -90,19 +90,19 @@ Please be aware that this expects basic C compilation libraries and tools to be 
 ### Cutting the release
 
 1. Update `lib/Sanger/CGP/AlleleCount.pm` to the correct version.
-2. Update `CHANGES.md` to show major items.
-3. Run `./prerelease.sh`
-4. Check all tests and coverage reports are acceptable.
-5. Commit the updated docs tree and updated module/version.
-6. Push commits.
-7. Use the GitHub tools to draft a release.
+1. Update `CHANGES.md` to show major items.
+1. Run `./prerelease.sh`
+1. Check all tests and coverage reports are acceptable.
+1. Commit the updated docs tree and updated module/version.
+1. Push commits.
+1. Use the GitHub tools to draft a release.
 
 ## LICENCE
 
 ```
 Copyright (c) 2014-2018 Genome Research Ltd.
 
-Author: CancerIT <cgpit@sanger.ac.uk>
+Author: CASM/Cancer IT <cgphelp@sanger.ac.uk>
 
 This file is part of alleleCount.
 
