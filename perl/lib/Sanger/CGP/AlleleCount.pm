@@ -1,9 +1,9 @@
 package Sanger::CGP::AlleleCount;
 
 ##########LICENCE##########
-# Copyright (c) 2014-2017 Genome Research Ltd.
+# Copyright (c) 2014-2018 Genome Research Ltd.
 #
-# Author: CancerIT <cgpit@sanger.ac.uk>
+# Author: CASM/Cancer IT <cgphelp@sanger.ac.uk>
 #
 # This file is part of alleleCount.
 #
@@ -25,7 +25,7 @@ package Sanger::CGP::AlleleCount;
 use strict;
 
 use base 'Exporter';
-our $VERSION = '3.3.1';
+our $VERSION = '4.0.0';
 our @EXPORT = qw($VERSION);
 
 1;

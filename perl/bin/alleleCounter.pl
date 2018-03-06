@@ -1,9 +1,9 @@
 #!/usr/bin/perl
 
 ##########LICENCE##########
-# Copyright (c) 2014,2015 Genome Research Ltd.
+# Copyright (c) 2014-2018 Genome Research Ltd.
 #
-# Author:  CancerIT <cgpit@sanger.ac.uk>
+# Author: CASM/Cancer IT <cgphelp@sanger.ac.uk>
 #
 # This file is part of alleleCount.
 #
@@ -21,14 +21,10 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 ##########LICENCE##########
 
-BEGIN {
-  use Cwd qw(abs_path);
-  use File::Basename;
-  unshift (@INC,dirname(abs_path($0)).'/../lib');
-};
+use FindBin qw($Bin);
+use lib "$Bin/../lib";
 
 use strict;
-use Data::Dumper;
 use Carp;
 use English qw( -no_match_vars );
 use warnings FATAL => 'all';
@@ -44,23 +40,21 @@ const my $MIN_PBQ => 30; # needs to correlate with Illumina bins
 
 {
   my $options = option_builder();
-  my $FH = *STDOUT;
-  open $FH, '>', $options->{'o'} or croak 'Failed to create '.$options->{'o'} if(defined $options->{'o'});
-  run($FH, $options);
-  close $FH if(defined $options->{'o'});
+  $options->{'o'} = '/dev/stdout' unless(defined $options->{'o'});
+  run($options);
 }
 
 sub run {
-  my ($FH, $options) = @_;
+  my ($options) = @_;
   my $geno_ob = Sanger::CGP::AlleleCount::Genotype->new();
   if($options->{'g'}) {
-    $geno_ob->gender_chk($options->{'b'}, $FH, $options->{'l'}, $options->{'m'}, $options->{'q'}, $options->{'r'});
+    $geno_ob->gender_chk($options->{'b'}, $options->{'o'}, $options->{'l'}, $options->{'m'}, $options->{'q'}, $options->{'r'});
   }
   elsif($options->{'s'}) {
-    $geno_ob->get_full_snp6_profile($options->{'b'}, $FH, $options->{'l'}, $options->{'m'}, $options->{'q'}, $options->{'r'});
+    $geno_ob->get_full_snp6_profile($options->{'b'}, $options->{'o'}, $options->{'l'}, $options->{'m'}, $options->{'q'}, $options->{'r'});
   }
   else {
-    $geno_ob->get_full_loci_profile($options->{'b'}, $FH, $options->{'l'}, $options->{'m'}, $options->{'q'}, $options->{'r'});
+    $geno_ob->get_full_loci_profile($options->{'b'}, $options->{'o'}, $options->{'l'}, $options->{'m'}, $options->{'q'}, $options->{'r'});
   }
 }
 
@@ -102,6 +96,8 @@ __END__
 alleleCounts.pl - Generate tab seperated file with allelic counts and depth for each specified locus.
 
 =head1 SYNOPSIS
+
+Where possible use the C version for large data (it's also more configurable).
 
 alleleCounts.pl
 
