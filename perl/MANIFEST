@@ -1,5 +1,4 @@
 bin/alleleCounter.pl
-bin/alleleCounter_version.pl
 docs.tar.gz
 lib/Sanger/CGP/AlleleCount.pm
 lib/Sanger/CGP/AlleleCount/Genotype.pm

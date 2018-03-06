@@ -3,14 +3,31 @@
 The alleleCount package primarily exists to prevent code duplication between some other projects,
 specifically AscatNGS and Battenberg.
 
-| Master | Dev |
-|---|---|
-| [![Build Status](https://travis-ci.org/cancerit/alleleCount.svg?branch=master)](https://travis-ci.org/cancerit/alleleCount) | [![Build Status](https://travis-ci.org/cancerit/alleleCount.svg?branch=dev)](https://travis-ci.org/cancerit/alleleCount) |
+| Master                                        | Develop                                         |
+| --------------------------------------------- | ----------------------------------------------- |
+| [![Master Badge][travis-master]][travis-base] | [![Develop Badge][travis-develop]][travis-base] |
 
 The project previously contained 2 equivalent implementations of allele counting code in perl and C
 for BAM/CRAM processing.  As of v4 the perl code wraps the C implementation in order to preserve the
 ability to use alleleCounter for those still using the perl implementation whilst using the speed of
 the C implementation without loosing the additional features it provides.
+
+<!-- TOC depthFrom:2 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
+
+- [Usage](#usage)
+	- [C version](#c-version)
+	- [Perl version](#perl-version)
+- [Loci files](#loci-files)
+	- [Generic loci File](#generic-loci-file)
+	- [SNP6 loci file (perl only)](#snp6-loci-file-perl-only)
+	- [Dependencies/Install](#dependenciesinstall)
+- [Docker, Singularity and Dockstore](#docker-singularity-and-dockstore)
+- [Creating a release](#creating-a-release)
+	- [Preparation](#preparation)
+	- [Cutting the release](#cutting-the-release)
+- [LICENCE](#licence)
+
+<!-- /TOC -->
 
 ## Usage
 
@@ -62,8 +79,6 @@ sort -k1,1 -n 2,2n loci_unsrt.tsv > losi_sorted.tsv
 
 Output file is different.
 
----
-
 ### Dependencies/Install
 
 Some of the code included in this package has dependencies:
@@ -78,7 +93,15 @@ These are all installed for you by running:
 
 Please be aware that this expects basic C compilation libraries and tools to be available.
 
----
+## Docker, Singularity and Dockstore
+
+There is a pre-built image containing this codebase on quay.io.
+
+* [dockstore-cgpwgs][ds-cgpwgs-git]: Contains additional tools for WGS analysis.
+
+This was primarily designed for use with dockstore.org but can be used as normal containers.
+
+The docker images are know to work correctly after import into a singularity image.
 
 ## Creating a release
 
@@ -129,3 +152,11 @@ statement that reads ‘Copyright (c) 2005-2012’ should be interpreted as bein
 identical to a statement that reads ‘Copyright (c) 2005, 2006, 2007, 2008,
 2009, 2010, 2011, 2012’."
 ```
+
+<!-- Travis -->
+[travis-base]: https://travis-ci.org/cancerit/alleleCount
+[travis-master]: https://travis-ci.org/cancerit/alleleCount.svg?branch=master
+[travis-develop]: https://travis-ci.org/cancerit/alleleCount.svg?branch=dev
+
+<!-- refs -->
+[ds-cgpwgs-git]: https://github.com/cancerit/dockstore-cgpwgs
