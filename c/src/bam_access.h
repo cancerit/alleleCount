@@ -1,7 +1,7 @@
 /**   LICENSE
-* Copyright (c) 2014-2017 Genome Research Ltd.
+* Copyright (c) 2014-2018 Genome Research Ltd.
 *
-* Author: Cancer Genome Project cgpit@sanger.ac.uk
+* Author: CASM/Cancer IT <cgphelp@sanger.ac.uk>
 *
 * This file is part of alleleCount.
 *
@@ -24,6 +24,7 @@
 
 #include <ctype.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <htslib/sam.h>
 
 typedef struct loci_stats{
@@ -52,10 +53,12 @@ void bam_access_exc_flag(int exc);
 
 int bam_access_openhts(char *hts_file, char *ref_file);
 
-int bam_access_get_position_base_counts(char *chr, int pos, loci_stats *stats);
+int bam_access_get_position_base_counts(char *chr, int pos, loci_stats *stats,int is_10x,FILE *output);
 
-int bam_access_get_multi_position_base_counts(loci_stats **stats, int stats_count);
+int bam_access_get_multi_position_base_counts(loci_stats **stats, int stats_count,int is_10x,FILE *output);
 
 void bam_access_closehts();
+
+int readCompare(const void *r1,const void *r2);
 
 #endif

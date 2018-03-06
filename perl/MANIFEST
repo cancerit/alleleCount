@@ -3,7 +3,6 @@ bin/alleleCounter_version.pl
 docs.tar.gz
 lib/Sanger/CGP/AlleleCount.pm
 lib/Sanger/CGP/AlleleCount/Genotype.pm
-lib/Sanger/CGP/AlleleCount/PileupData.pm
 Makefile.PL
 MANIFEST			This list of files
 MANIFEST.SKIP
