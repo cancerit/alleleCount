@@ -1,8 +1,8 @@
 # CHANGES
 
-## NEXT
+## v4.0.0
 
-* alleleCounter now counts per-fragment rather than per-read when overlaps occur.
+* alleleCounter now counts **_per-fragment_** rather than per-read when overlaps occur.
 * Reworked perl to wrap C alleleCounter and just handle the extra format changes.
 * No dep on Bio::DB::HTS now.
 * Update to HTSlib 1.7
