@@ -1,5 +1,10 @@
 # CHANGES
 
+## v4.0.1
+
+* Where a proper pair filter is used, now check for the correct paired-end orientation of F/R.
+* If this is not met the read is ignored.
+
 ## v4.0.0
 
 * alleleCounter now counts **_per-fragment_** rather than per-read when overlaps occur.
