@@ -8,7 +8,7 @@
 **This will mean that mate-pair orientation (F/F or R/R) will be rejected**
 
 * Where a proper pair filter is used, now check for the correct paired-end orientation of F/R.
-* If this is not met the read is ignored.**
+* If this is not met the read is ignored.
 
 ## v4.0.0
 
