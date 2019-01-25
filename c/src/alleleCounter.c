@@ -70,6 +70,8 @@ void alleleCounter_print_usage (int exit_code){
 	printf ("                                   the consensus base for that UMI. \n");
 	printf ("                                 by iterating through bam file rather than using a 'fetch' approach.\n");
 	printf (" -f  --required-flag [int]       Flag value of reads to retain in allele counting default: [%i].\n",inc_flag);
+  printf ("                                 N.B. if the proper-pair flag is are selected, alleleCounter will assume paired-end\n");
+  printf ("                                 and filter out any proper-pair flagged reads not in F/R orientation.");
 	printf (" -F  --filtered-flag [int]       Flag value of reads to exclude in allele counting default: [%i].\n",exc_flag);
 	printf (" -v  --version                   Display version number.\n");
 	printf (" -h  --help                      Display this usage information.\n\n");
