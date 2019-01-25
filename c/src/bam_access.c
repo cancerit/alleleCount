@@ -344,8 +344,7 @@ int bam_access_get_multi_position_base_counts(loci_stats **stats, int stats_coun
 	    if(b->core.qual < min_map_qual || (b->core.flag & exc_flag) || (b->core.flag & inc_flag) != inc_flag) continue;
         //Additional check for properly paired reads - they must be in correct paired end orientation
         if(inc_flag & BAM_FPROPER_PAIR){
-            if(((b->core.flag & BAM_FMREVERSE) && (b->core.flag & BAM_FREVERSE))) continue;
-            if ((!(b->core.flag & BAM_FMREVERSE) && !(b->core.flag & BAM_FREVERSE))) continue;
+          if ((!(b->core.flag & BAM_FMREVERSE) == !(b->core.flag & BAM_FREVERSE))) continue;
         }
        //Extract 10x checks
        if(is_10x){
