@@ -1,5 +1,9 @@
 # CHANGES
 
+## v4.0.2
+
+* Added checking of iterator error codes when calling sam_itr_next
+
 ## v4.0.1
 
 ### Behaviour change
