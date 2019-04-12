@@ -376,6 +376,7 @@ int bam_access_get_multi_position_base_counts(loci_stats **stats, int stats_coun
 	    }
        //printf("Returning to read loading.\n");
 	  }//End of iteration through sam_iter
+    check(result>=-1, "Error detected (%d) when trying to iterate through region.",result);
 		bam_plp_push(buf, 0); // finalize pileup
 		while ((pl=bam_plp_next(buf, &tid, &pos, &n_plp)) > 0) {
 			if(j==stats_count || pos+1>stats[stop_idx]->pos) break;
@@ -419,12 +420,11 @@ int bam_access_get_position_base_counts(char *chr, int posn, loci_stats *stats,i
 	check_mem(region);
 	sprintf(region,"%s:%d-%d",chr,posn,posn);
 	fholder->beg = posn;
-	fholder->end = posn;
+    fholder->end = posn;
 
   // initialize pileup
 	buf = bam_plp_init(pileup_func, (void *)fholder);
 	bam_plp_set_maxcnt(buf,maxitercnt);
-
   /*
   sam_fetch(fholder->in, fholder->idx, ref, fholder->beg, fholder->end, buf, fetch_algo_func);
   */
@@ -451,6 +451,7 @@ int bam_access_get_position_base_counts(char *chr, int posn, loci_stats *stats,i
     //umi = bam_aux2Z(aux_val_umi);
     //printf("Got tag: bc=%s umi=%s\n",barcode,umi);
   }
+  check(result>=-1, "Error detected (%d) when trying to iterate through region.",result);
   sam_itr_destroy(iter);
   bam_plp_push(buf, 0);
   int tid, pos, n_plp = -1;
