@@ -52,6 +52,10 @@ set -u
 ### alleleCount
 if [ ! -e $SETUP_DIR/alleleCount.success ]; then
   cd $INIT_DIR
-  ./setup.sh $INST_PATH
-  touch $SETUP_DIR/alleleCount.success
+  mkdir -p $INIT_DIR/c/bin
+  make -C c clean
+  export prefix=$INST_PATH
+  make -C c -j$CPU
+  cp $INIT_DIR/c/bin/alleleCounter $INST_PATH/bin/.
+  touch $SETUP_DIR/alleleCounter.success
 fi
