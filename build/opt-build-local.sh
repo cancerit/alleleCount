@@ -49,13 +49,22 @@ export MANPATH=`echo $INST_PATH/man:$INST_PATH/share/man:$MANPATH | perl -pe 's/
 export PERL5LIB=`echo $INST_PATH/lib/perl5:$PERL5LIB | perl -pe 's/:\$//;'`
 set -u
 
+CPANM=`which cpanm`
 ### alleleCount
 if [ ! -e $SETUP_DIR/alleleCount.success ]; then
+  #build the C part
   cd $INIT_DIR
   mkdir -p $INIT_DIR/c/bin
   make -C c clean
   export prefix=$INST_PATH
   make -C c -j$CPU
   cp $INIT_DIR/c/bin/alleleCounter $INST_PATH/bin/.
+  #build the perl part
+  $CPANM --no-interactive --notest --mirror http://cpan.metacpan.org -l $INST_PATH/ --installdeps $INIT_DIR/perl/. < /dev/null
+  cd $INIT_DIR/perl
+  perl Makefile.PL INSTALL_BASE=$INST_PATH
+  make
+  make test
+  make install
   touch $SETUP_DIR/alleleCounter.success
 fi
