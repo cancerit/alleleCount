@@ -2,32 +2,17 @@ notifications:
   slack: wtsi-cgpit:ptUMR1tkNyZJYd9TpGoss8WR
   email: false
 
-env:
- - CC=gcc
+sudo: false
 
-addons:
- apt:
-  packages:
-   - build-essential
-   - autoconf
-   - curl
-   - zlib1g-dev
-   - libncurses5-dev
-   - libpstreams-dev
-   - libcurl4-openssl-dev
+language: ruby
 
-install: true
-
-language: perl
-
-perl:
- - "5.22"
-# - "5.16"
+services:
+  - docker
 
 script:
- - ./setup.sh $HOME/wtsi-opt
- - ls -l $HOME/wtsi-opt/bin/alleleCounter
- - ls -l $HOME/wtsi-opt/bin/alleleCounter.pl
  - echo 'Build and check docker image'
  - docker build -t allelec .
  - docker images | grep -c allelec
+ - echo 'Verify program(s) from this repo'
+ - docker run -t --rm allelec alleleCounter -v
+ - docker run -t --rm allelec alleleCounter.pl -v
