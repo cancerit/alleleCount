@@ -28,3 +28,6 @@ script:
  - ./setup.sh $HOME/wtsi-opt
  - ls -l $HOME/wtsi-opt/bin/alleleCounter
  - ls -l $HOME/wtsi-opt/bin/alleleCounter.pl
+ - echo 'Build and check docker image'
+ - docker build -t allelec .
+ - docker images | grep -c allelec
