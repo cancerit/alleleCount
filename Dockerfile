@@ -1,19 +1,32 @@
-FROM  quay.io/wtsicgp/dockstore-cgpmap:3.1.4 as builder
+FROM  ubuntu:16.04 as builder
 
 USER  root
 
+# ALL tool versions used by opt-build.sh
+ENV VER_HTSLIB="1.7"
+
 RUN apt-get -yq update
 RUN apt-get install -yq --no-install-recommends \
-locales \
-g++ \
+build-essential \
+apt-transport-https \
+curl \
+ca-certificates \
 make \
+bzip2 \
 gcc \
-pkg-config \
-python \
+locales \
+curl \
+wget \
+libtasn1-dev \
+libgnutls-dev \
+nettle-dev \
+libgmp-dev \
+libp11-kit-dev \
 zlib1g-dev \
 libbz2-dev \
-liblzma-dev
-
+liblzma-dev \
+libcurl4-gnutls-dev \
+libncurses5-dev
 
 RUN locale-gen en_US.UTF-8
 RUN update-locale LANG=en_US.UTF-8
@@ -26,7 +39,8 @@ ENV LC_ALL en_US.UTF-8
 ENV LANG en_US.UTF-8
 
 # build tools from other repos
-# no need to do other repos it is already installed in base image
+ADD build/opt-build.sh build/
+RUN bash build/opt-build.sh $OPT
 
 # build the tools in this repo, separate to reduce build time on errors
 COPY . .

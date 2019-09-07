@@ -47,26 +47,40 @@ export LD_LIBRARY_PATH=`echo $INST_PATH/lib:$LD_LIBRARY_PATH | perl -pe 's/:\$//
 export PATH=`echo $INST_PATH/bin:$PATH | perl -pe 's/:\$//;'`
 export MANPATH=`echo $INST_PATH/man:$INST_PATH/share/man:$MANPATH | perl -pe 's/:\$//;'`
 export PERL5LIB=`echo $INST_PATH/lib/perl5:$PERL5LIB | perl -pe 's/:\$//;'`
-CPANM=`which cpanm`
-echo  "Installing Perl prerequisites ..."
-$CPANM --no-interactive --notest --mirror http://cpan.metacpan.org -l $INST_PATH/ --installdeps $INIT_DIR/perl/. < /dev/null
-
 set -u
-### alleleCount
-echo "Building alleleCounter ..."
-if [ ! -e $SETUP_DIR/alleleCount.success ]; then
-  #build the C part
-  cd $INIT_DIR
-  mkdir -p $INIT_DIR/c/bin
-  make -C c clean
-  export prefix=$INST_PATH
-  make -C c -j$CPU
-  cp $INIT_DIR/c/bin/alleleCounter $INST_PATH/bin/.
-  #build the perl part
-  cd $INIT_DIR/perl
-  perl Makefile.PL INSTALL_BASE=$INST_PATH
-  make
-  make test
+
+## grab cpanm 
+curl -L http://cpanmin.us | perl - App::cpanminus
+CPANM=`which cpanm`
+
+echo "Installing Perl base deps ..."
+if [ ! -e $SETUP_DIR/basePerlDeps.success ]; then
+  perlmods=( "ExtUtils::CBuilder" "Module::Build~0.42" "Const::Fast" "File::Which" "LWP::UserAgent")
+  for i in "${perlmods[@]}" ; do
+    $CPANM --no-interactive --notest --mirror http://cpan.metacpan.org -l $INST_PATH $i
+  done
+  touch $SETUP_DIR/basePerlDeps.success
+fi
+
+SOURCE_HTSLIB="https://github.com/samtools/htslib/releases/download/${VER_HTSLIB}/htslib-${VER_HTSLIB}.tar.bz2"
+
+cd $SETUP_DIR
+
+echo "Downloading htslib ..."
+if [ ! -e $SETUP_DIR/htslibGet.success ]; then
+  cd $SETUP_DIR
+  wget $SOURCE_HTSLIB
+  touch $SETUP_DIR/htslibGet.success
+fi
+
+echo "Building htslib ..."
+if [ ! -e $SETUP_DIR/htslib.success ]; then
+  mkdir -p htslib
+  tar --strip-components 1 -C htslib -jxf htslib-${VER_HTSLIB}.tar.bz2
+  cd htslib
+  ./configure --enable-plugins --enable-libcurl --prefix=$INST_PATH
+  make -j$CPU
   make install
-  touch $SETUP_DIR/alleleCounter.success
+  cd $SETUP_DIR
+  touch $SETUP_DIR/htslib.success
 fi
