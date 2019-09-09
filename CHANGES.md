@@ -1,5 +1,9 @@
 # CHANGES
 
+## v4.1.0
+
+* Created Docker file and build scripts to generate a containeraized code
+
 ## v4.0.2
 
 * Added checking of iterator error codes when calling sam_itr_next

@@ -3,6 +3,8 @@
 The alleleCount package primarily exists to prevent code duplication between some other projects,
 specifically AscatNGS and Battenberg.
 
+[![Quay Badge][quay-status]][quay-repo]
+
 | Master                                        | Develop                                         |
 | --------------------------------------------- | ----------------------------------------------- |
 | [![Master Badge][travis-master]][travis-base] | [![Develop Badge][travis-develop]][travis-base] |
@@ -160,3 +162,8 @@ identical to a statement that reads ‘Copyright (c) 2005, 2006, 2007, 2008,
 
 <!-- refs -->
 [ds-cgpwgs-git]: https://github.com/cancerit/dockstore-cgpwgs
+
+<!-- Quay.io -->
+[quay-status]: https://quay.io/repository/wtsicgp/allelecount/status
+[quay-repo]: https://quay.io/repository/wtsicgp/allelecount
+[quay-builds]: https://quay.io/repository/wtsicgp/allelecount?tab=builds

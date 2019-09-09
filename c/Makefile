@@ -12,7 +12,7 @@ CFLAGS = -g -Wall
 HTSLOC?=$(HTSLIB)
 
 HTSTMP?=./htslib_tmp
-prefix=?/usr/local/
+prefix?=/usr/local/
 
 #Define locations of header files
 OPTINC?=-I$(HTSLOC)/
