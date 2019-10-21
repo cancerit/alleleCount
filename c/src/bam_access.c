@@ -118,6 +118,9 @@ void pileupCounts(const bam_pileup1_t *pil, int n_plp, loci_stats *stats){
 	for(i=0;i<n_plp;i++){
 		const bam_pileup1_t *p = pil + i;
 		int qual = bam_get_qual(p->b)[p->qpos];
+		printf("Read posis %d\n" , p->qpos);
+		printf("Read posis %d\n" , p->alignment->query->length);
+		int read_pos=p->qpos
 		uint8_t c = bam_seqi(bam_get_seq(p->b), p->qpos);
 		int absent;
     k = kh_put(strh, h, bam_get_qname(p->b), &absent);
