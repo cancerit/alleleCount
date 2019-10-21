@@ -29,7 +29,7 @@
 
 static int min_base_q = 20;
 static int min_map_q = 35;
-static int end_clip = 0;
+static int end_clip = 10;
 static char *hts_file;
 static char *loci_file;
 static char *out_file;
