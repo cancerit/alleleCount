@@ -38,6 +38,7 @@ int include_dup = 0;
 int include_se = 0;
 int min_base_qual = 20;
 int min_map_qual = 35;
+int end_clip = 0;
 int inc_flag = 3;
 int exc_flag = 3852;
 int maxitercnt = 1000000000; //Overrride internal maxcnt for iterator!
@@ -499,6 +500,11 @@ void bam_access_min_base_qual(int qual){
 
 void bam_access_min_map_qual(int qual){
 	min_map_qual = qual;
+	return;
+}
+
+void bam_access_end_clip(int bases){
+	end_clip = bases;
 	return;
 }
 
