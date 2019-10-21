@@ -125,8 +125,20 @@ void pileupCounts(const bam_pileup1_t *pil, int n_plp, loci_stats *stats){
 		printf("Read posis %d\n" ,read_pos);
 		//the_seq=bam_get_seq(p->b);
 		uint32_t len = p->b->core.l_qseq;
+		int clip_it=0
+		if(read_pos<end_clip || read_pos>(len-clip_in-1))
+		{
+			clip_it=1
+		}
 		//int len_seq=sizeof(*bam_get_seq(p->b));
 		printf("Read size is %d\n" , len);
+		
+		if(clip_it==1)
+		{
+			printf("IGNORED %d\n", clip_it);
+		}
+		
+		
 		uint8_t c = bam_seqi(bam_get_seq(p->b), p->qpos);
 		//uint8_t c = bam_seqi(the_seq, read_pos);
 		
@@ -140,7 +152,7 @@ void pileupCounts(const bam_pileup1_t *pil, int n_plp, loci_stats *stats){
 			//Add the value to the hash
 			kh_value(h, k) = c;
 		}
-		if(!(p->is_del) &&  qual >= min_base_qual && (absent || pre_b != c)){
+		if(!(p->is_del) &&  qual >= min_base_qual && (absent || pre_b != c) && clip_it==0){
 			//&& (c == 1 /*A*/|| c == 2 /*C*/|| c == 4 /*G*/|| c == 8 /*T*/)){
 			//Now we add a new read pos struct to the list since the read is valid.
 			//char cbase = toupper(bam_nt16_rev_table[c]);
@@ -352,6 +364,7 @@ int bam_access_get_multi_position_base_counts(loci_stats **stats, int stats_coun
        uint8_t *aux_val_bcode;
        uint8_t *aux_val_umi;
        //printf("Got another read \n");
+		  
 	    if(b->core.qual < min_map_qual || (b->core.flag & exc_flag) || (b->core.flag & inc_flag) != inc_flag) continue;
         //Additional check for properly paired reads - they must be in correct paired end orientation
         if(inc_flag & BAM_FPROPER_PAIR){
