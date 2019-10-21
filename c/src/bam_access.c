@@ -122,8 +122,8 @@ void pileupCounts(const bam_pileup1_t *pil, int n_plp, loci_stats *stats){
 		//printf("Read posis %d\n" , p->qpos);
 		//printf("Read posis %d\n" , p->b->query->length);
 		int read_pos=p->qpos;
-		printf("Read posis %d\n" ,read_pos);
-		printf("End clip %d\n" ,end_c);
+		//printf("Read posis %d\n" ,read_pos);
+		//printf("End clip %d\n" ,end_c);
 		//the_seq=bam_get_seq(p->b);
 		uint32_t len = p->b->core.l_qseq;
 		int clip_it=0;
@@ -132,12 +132,12 @@ void pileupCounts(const bam_pileup1_t *pil, int n_plp, loci_stats *stats){
 			clip_it=1;
 		}
 		//int len_seq=sizeof(*bam_get_seq(p->b));
-		printf("Read size is %d\n" , len);
-		printf("Min map qual %d\n" , min_map_qual);
-		if(clip_it==1)
-		{
-			printf("IGNORED %d\n", clip_it);
-		}
+		//printf("Read size is %d\n" , len);
+		//printf("Min map qual %d\n" , min_map_qual);
+		//if(clip_it==1)
+		//{
+		//	printf("IGNORED %d\n", clip_it);
+		//}
 		
 		
 		uint8_t c = bam_seqi(bam_get_seq(p->b), p->qpos);
