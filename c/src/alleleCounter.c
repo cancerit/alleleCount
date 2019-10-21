@@ -400,6 +400,8 @@ int main(int argc, char *argv[]){
 
 	bam_access_exc_flag(exc_flag);
 
+	bam_access_end_clip(end_clip);
+	
 	//Open output file for writing
 	FILE *output = fopen(out_file,"w");
   check(output != NULL, "Error opening file %s for write.",out_file);
