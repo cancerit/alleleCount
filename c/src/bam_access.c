@@ -121,6 +121,7 @@ void pileupCounts(const bam_pileup1_t *pil, int n_plp, loci_stats *stats){
 		//printf("Read posis %d\n" , p->qpos);
 		//printf("Read posis %d\n" , p->b->query->length);
 		int read_pos=p->qpos;
+		printf("Read posis %d\n" ,read_pos);
 		//the_seq=bam_get_seq(p->b);
 		int len_seq=sizeof(*bam_get_seq(p->b));
 		printf("Read size is %d\n" , len_seq);
