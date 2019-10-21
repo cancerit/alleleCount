@@ -133,7 +133,7 @@ void pileupCounts(const bam_pileup1_t *pil, int n_plp, loci_stats *stats){
 		}
 		//int len_seq=sizeof(*bam_get_seq(p->b));
 		printf("Read size is %d\n" , len);
-		
+		printf("Min map qual %d\n" , min_map_qual);
 		if(clip_it==1)
 		{
 			printf("IGNORED %d\n", clip_it);
