@@ -38,7 +38,7 @@ int include_dup = 0;
 int include_se = 0;
 int min_base_qual = 20;
 int min_map_qual = 35;
-int end_clip = 0;
+int end_c = 0;
 int inc_flag = 3;
 int exc_flag = 3852;
 int maxitercnt = 1000000000; //Overrride internal maxcnt for iterator!
@@ -123,11 +123,11 @@ void pileupCounts(const bam_pileup1_t *pil, int n_plp, loci_stats *stats){
 		//printf("Read posis %d\n" , p->b->query->length);
 		int read_pos=p->qpos;
 		printf("Read posis %d\n" ,read_pos);
-		printf("End clip %d\n" ,end_clip);
+		printf("End clip %d\n" ,end_c);
 		//the_seq=bam_get_seq(p->b);
 		uint32_t len = p->b->core.l_qseq;
 		int clip_it=0;
-		if(read_pos<end_clip || read_pos>(len-end_clip-1))
+		if(read_pos<end_c || read_pos>(len-end_c-1))
 		{
 			clip_it=1;
 		}
@@ -518,7 +518,7 @@ void bam_access_min_map_qual(int qual){
 }
 
 void bam_access_end_clip(int bases){
-	end_clip = bases;
+	end_c = bases;
 	return;
 }
 
