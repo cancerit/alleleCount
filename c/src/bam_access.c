@@ -38,7 +38,7 @@ int include_dup = 0;
 int include_se = 0;
 int min_base_qual = 20;
 int min_map_qual = 35;
-int end_c;
+int end_c=10;
 int inc_flag = 3;
 int exc_flag = 3852;
 int maxitercnt = 1000000000; //Overrride internal maxcnt for iterator!
