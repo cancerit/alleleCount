@@ -125,7 +125,7 @@ void pileupCounts(const bam_pileup1_t *pil, int n_plp, loci_stats *stats){
 		printf("Read posis %d\n" ,read_pos);
 		//the_seq=bam_get_seq(p->b);
 		uint32_t len = p->b->core.l_qseq;
-		int clip_it=0
+		int clip_it=0;
 		if(read_pos<end_clip || read_pos>(len-clip_in-1))
 		{
 			clip_it=1
