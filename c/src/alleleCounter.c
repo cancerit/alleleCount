@@ -435,7 +435,7 @@ int main(int argc, char *argv[]){
    }else{
     if(is_dense){
   		fprintf(stderr,"Multi pos start:\n");
-  		int ret = bam_access_get_multi_position_base_counts(locis, loci_count,is_10x,output);
+  		int ret = bam_access_get_multi_position_base_counts(locis, loci_count,is_10x,end_clip,output);
   		check(ret==0,"Error scanning through bam file for loci list with dense snps.");
   		int j=0;
   		for(j=0;j<loci_count;j++){
@@ -451,7 +451,7 @@ int main(int argc, char *argv[]){
     }else{
   		int j=0;
   		for(j=0;j<loci_count;j++){
-  			int ret = bam_access_get_position_base_counts(locis[j]->chr,locis[j]->pos,locis[j],is_10x,output);
+  			int ret = bam_access_get_position_base_counts(locis[j]->chr,locis[j]->pos,locis[j],is_10x,end_clip,output);
   			check(ret==0,"Error retrieving stats from bam file for position %s:%d",locis[j]->chr,locis[j]->pos);
         int depth = locis[j]->base_counts[0]+locis[j]->base_counts[1]+locis[j]->base_counts[2]+locis[j]->base_counts[3];
         int check_print = print_section(output,locis[j]->chr,locis[j]->pos,locis[j]->base_counts[0],
