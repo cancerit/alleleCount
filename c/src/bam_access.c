@@ -130,6 +130,7 @@ void pileupCounts(const bam_pileup1_t *pil, int n_plp, loci_stats *stats){
 		if(read_pos<end_c || read_pos>(len-end_c-1))
 		{
 			clip_it=1;
+			continue;
 		}
 		//int len_seq=sizeof(*bam_get_seq(p->b));
 		//printf("Read size is %d\n" , len);
@@ -144,7 +145,7 @@ void pileupCounts(const bam_pileup1_t *pil, int n_plp, loci_stats *stats){
 		//uint8_t c = bam_seqi(the_seq, read_pos);
 		
 		int absent;
-    k = kh_put(strh, h, bam_get_qname(p->b), &absent);
+    		k = kh_put(strh, h, bam_get_qname(p->b), &absent);
 		uint8_t pre_b;
 		if(!absent){ //Read already processed to get base processed (we only increment if base is different between overlapping read pairs)
 			k = kh_get(strh, h, bam_get_qname(p->b));
@@ -153,7 +154,7 @@ void pileupCounts(const bam_pileup1_t *pil, int n_plp, loci_stats *stats){
 			//Add the value to the hash
 			kh_value(h, k) = c;
 		}
-		if(!(p->is_del) &&  qual >= min_base_qual && (absent || pre_b != c) && clip_it==0){
+		if(!(p->is_del) &&  qual >= min_base_qual && (absent || pre_b != c)){
 			//&& (c == 1 /*A*/|| c == 2 /*C*/|| c == 4 /*G*/|| c == 8 /*T*/)){
 			//Now we add a new read pos struct to the list since the read is valid.
 			//char cbase = toupper(bam_nt16_rev_table[c]);
