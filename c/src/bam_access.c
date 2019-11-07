@@ -127,6 +127,7 @@ void pileupCounts(const bam_pileup1_t *pil, int n_plp, loci_stats *stats){
 		//the_seq=bam_get_seq(p->b);
 		uint32_t len = p->b->core.l_qseq;
 		int clip_it=0;
+		//skip if position is is less than is defined by the -e paramater
 		if(read_pos<end_c || read_pos>(len-end_c-1))
 		{
 			clip_it=1;
