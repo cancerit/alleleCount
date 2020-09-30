@@ -1,5 +1,9 @@
 # CHANGES
 
+## v4.2.0
+
+* Updated to hstlib 1.11
+
 ## v4.1.0
 
 * Created Docker file and build scripts to generate a containeraized code
