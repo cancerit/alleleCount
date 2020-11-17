@@ -1,32 +1,33 @@
-FROM  ubuntu:16.04 as builder
+FROM  ubuntu:20.04 as builder
 
 USER  root
 
 # ALL tool versions used by opt-build.sh
-ENV VER_HTSLIB="1.7"
+# need to keep in sync with setup.sh
+ENV VER_HTSLIB="1.11"
+ENV VER_LIBDEFLATE="v1.6"
 
 RUN apt-get -yq update
-RUN apt-get install -yq --no-install-recommends \
-build-essential \
-apt-transport-https \
-curl \
-ca-certificates \
-make \
-bzip2 \
-gcc \
-locales \
-curl \
-wget \
-libtasn1-dev \
-libgnutls-dev \
-nettle-dev \
-libgmp-dev \
-libp11-kit-dev \
-zlib1g-dev \
-libbz2-dev \
-liblzma-dev \
-libcurl4-gnutls-dev \
-libncurses5-dev
+RUN apt-get install -yq --no-install-recommends
+RUN apt-get install -yq --no-install-recommends build-essential
+RUN apt-get install -yq --no-install-recommends apt-transport-https
+RUN apt-get install -yq --no-install-recommends curl
+RUN apt-get install -yq --no-install-recommends ca-certificates
+RUN apt-get install -yq --no-install-recommends make
+RUN apt-get install -yq --no-install-recommends bzip2
+RUN apt-get install -yq --no-install-recommends gcc
+RUN apt-get install -yq --no-install-recommends locales
+RUN apt-get install -yq --no-install-recommends curl
+RUN apt-get install -yq --no-install-recommends wget
+RUN apt-get install -yq --no-install-recommends libtasn1-dev
+RUN apt-get install -yq --no-install-recommends nettle-dev
+RUN apt-get install -yq --no-install-recommends libgmp-dev
+RUN apt-get install -yq --no-install-recommends libp11-kit-dev
+RUN apt-get install -yq --no-install-recommends zlib1g-dev
+RUN apt-get install -yq --no-install-recommends libbz2-dev
+RUN apt-get install -yq --no-install-recommends liblzma-dev
+RUN apt-get install -yq --no-install-recommends libcurl4-gnutls-dev
+RUN apt-get install -yq --no-install-recommends libncurses5-dev
 
 RUN locale-gen en_US.UTF-8
 RUN update-locale LANG=en_US.UTF-8
@@ -46,11 +47,10 @@ RUN bash build/opt-build.sh $OPT
 COPY . .
 RUN bash build/opt-build-local.sh $OPT
 
-FROM ubuntu:16.04
+FROM ubuntu:20.04
 
 LABEL maintainer="cgphelp@sanger.ac.uk" \
       uk.ac.sanger.cgp="Cancer, Ageing and Somatic Mutation, Wellcome Trust Sanger Institute" \
-      version="v1.0.0" \
       description="alleleCount docker"
 
 RUN apt-get -yq update
