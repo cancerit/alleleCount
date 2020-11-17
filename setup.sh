@@ -69,8 +69,10 @@ bash build/opt-build-local.sh $INST_PATH
 
 echo
 echo
-echo "Please add the following to beginning of path:"
+echo "Please add the following to beginning of PATH:"
 echo "  $INST_PATH/bin"
+echo "Please add the following to beginning of LD_LIBRARY_PATH:"
+echo "  $INST_PATH/lib"
 echo
 
 exit 0
