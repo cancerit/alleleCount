@@ -58,7 +58,7 @@ echo "Installing Perl base deps ..."
 if [ ! -e $SETUP_DIR/basePerlDeps.success ]; then
   perlmods=( "ExtUtils::CBuilder" "Module::Build~0.42" "Const::Fast" "File::Which" "LWP::UserAgent")
   for i in "${perlmods[@]}" ; do
-    $CPANM --no-interactive --notest --mirror http://cpan.metacpan.org -l $INST_PATH $i
+    cpanm --no-interactive --notest --mirror http://cpan.metacpan.org -l $INST_PATH $i
   done
   touch $SETUP_DIR/basePerlDeps.success
 fi
