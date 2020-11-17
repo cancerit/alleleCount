@@ -52,6 +52,18 @@ cd $INST_PATH
 INST_PATH=`pwd`
 cd $INIT_DIR
 
+# make sure that build is self contained
+PERLROOT=$INST_PATH/lib/perl5
+
+# allows user to knowingly specify other PERL5LIB areas.
+if [ -z ${CGP_PERLLIBS+x} ]; then
+  export PERL5LIB="$PERLROOT"
+else
+  export PERL5LIB="$PERLROOT:$CGP_PERLLIBS"
+fi
+
+export OPT=$INST_PATH
+
 #add bin path for install tests
 export PATH=$INST_PATH/bin:$PATH
 
