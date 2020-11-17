@@ -64,9 +64,6 @@ fi
 
 export OPT=$INST_PATH
 
-#add bin path for install tests
-export PATH=$INST_PATH/bin:$PATH
-
 bash build/opt-build.sh $INST_PATH
 bash build/opt-build-local.sh $INST_PATH
 

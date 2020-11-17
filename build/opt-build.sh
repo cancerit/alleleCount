@@ -49,9 +49,10 @@ export MANPATH=`echo $INST_PATH/man:$INST_PATH/share/man:$MANPATH | perl -pe 's/
 export PERL5LIB=`echo $INST_PATH/lib/perl5:$PERL5LIB | perl -pe 's/:\$//;'`
 set -u
 
-## grab cpanm
-curl -L http://cpanmin.us | perl - App::cpanminus
-CPANM=`which cpanm`
+## INSTALL CPANMINUS
+curl -sSL https://cpanmin.us/ > $SETUP_DIR/cpanm
+perl $SETUP_DIR/cpanm --no-wget --no-interactive --notest --mirror http://cpan.metacpan.org -l $INST_PATH App::cpanminus
+rm -f $SETUP_DIR/cpanm
 
 echo "Installing Perl base deps ..."
 if [ ! -e $SETUP_DIR/basePerlDeps.success ]; then
