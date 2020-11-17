@@ -125,7 +125,7 @@ The docker images are know to work correctly after import into a singularity ima
 ## LICENCE
 
 ```
-Copyright (c) 2014-2018 Genome Research Ltd.
+Copyright (c) 2014-2020 Genome Research Ltd.
 
 Author: CASM/Cancer IT <cgphelp@sanger.ac.uk>
 

@@ -1,5 +1,11 @@
 # CHANGES
 
+## v4.2.1
+
+* Update so docker and native install use same install scripts behind the scenes
+* Docker now actually has htslib 1.11
+* htslib compiled with libdeflate for improved performance
+
 ## v4.2.0
 
 * Updated to hstlib 1.11
