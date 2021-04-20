@@ -28,7 +28,8 @@
 #include "dbg.h"
 
 static int min_base_q = 20;
-static int min_map_q = 35;
+static int min_map_q = 45;
+static int end_clip = 5;
 static char *hts_file;
 static char *loci_file;
 static char *out_file;
@@ -62,6 +63,7 @@ void alleleCounter_print_usage (int exit_code){
 	printf ("                                     can't be found alleleCounter may fail to work correctly.\n");
 	printf (" -m  --min-base-qual [int]       Minimum base quality [Default: %d].\n",min_base_q);
 	printf (" -q  --min-map-qual [int]        Minimum mapping quality [Default: %d].\n",min_map_q);
+	printf (" -e  --end-clip-reads [int]     Amount of bases to clip from end of reads [Default: %d].\n",end_clip);
 	printf (" -c  --contig [string]           Limit calling to named contig.\n");
 	printf (" -d  --dense-snps                Improves performance where many positions are close together \n");
 	printf (" -x  --is-10x                    Enables 10X processing mode.\n");
@@ -93,6 +95,7 @@ void alleleCounter_setup_options(int argc, char *argv[]){
              	{"output-file",required_argument , 0, 'o'},
              	{"min-base-qual", required_argument, 0, 'm'},
 							{"min-map-qual", required_argument, 0, 'q'},
+							{"end_clip", required_argument, 0, 'e'},
 							{"is-snp6", required_argument, 0, 's'},
 							{"is-10x", required_argument, 0, 'x'},
 							{"contig", required_argument, 0, 'c'},
@@ -108,7 +111,7 @@ void alleleCounter_setup_options(int argc, char *argv[]){
    int iarg = 0;
 
    //Iterate through options
-   while((iarg = getopt_long(argc, argv, "f:F:l:b:m:o:q:r:c:hdsvx", long_opts, &index)) != -1){
+   while((iarg = getopt_long(argc, argv, "f:F:l:b:m:o:q:r:c:e:hdsvx", long_opts, &index)) != -1){
    	switch(iarg){
    		  case 'h':
          	alleleCounter_print_usage(0);
@@ -134,6 +137,10 @@ void alleleCounter_setup_options(int argc, char *argv[]){
       		min_map_q = atoi(optarg);
       		break;
 
+      	case 'e':
+      		end_clip = atoi(optarg);
+      		break;
+			
       	case 'b':
       		hts_file = optarg;
       		break;
@@ -393,6 +400,8 @@ int main(int argc, char *argv[]){
 
 	bam_access_exc_flag(exc_flag);
 
+	bam_access_end_clip(end_clip);
+	
 	//Open output file for writing
 	FILE *output = fopen(out_file,"w");
   check(output != NULL, "Error opening file %s for write.",out_file);
