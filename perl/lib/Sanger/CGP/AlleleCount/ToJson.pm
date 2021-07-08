@@ -28,6 +28,9 @@ use Carp;
 use English qw( -no_match_vars );
 use warnings FATAL => 'all';
 
+use JSON;
+use IO::Zlib;
+
 use Const::Fast qw(const);
 
 =item new
