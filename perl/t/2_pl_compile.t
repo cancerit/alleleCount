@@ -49,16 +49,17 @@ for(@scripts) {
     next;
   }
   my $message = "Compilation check: $script";
+  my $output = "";
   my $command = "$perl -c $script";
   my ($pid, $process);
   try {
     $pid = open $process, $command.' 2>&1 |';
-    while(<$process>){};
+    while(<$process>){ $output.=$_;};
     close $process;
     pass($message);
   }
   catch {
-    fail($message);
+    fail($message."\n".$output);
   };
 }
 
