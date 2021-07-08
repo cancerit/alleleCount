@@ -31,6 +31,8 @@ use warnings FATAL => 'all';
 use JSON;
 use IO::Zlib;
 
+use Sanger::CGP::AlleleCount;
+
 use Const::Fast qw(const);
 
 =item new
