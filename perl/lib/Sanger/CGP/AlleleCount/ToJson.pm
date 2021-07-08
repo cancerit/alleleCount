@@ -57,7 +57,7 @@ sub alleleCountToJson{
   my $snp_list;
 
   #TODO open gzipped file....
-  open($SNPS, '<', $snpsfile) or $log->logcroak("Error opening allele count locus file for JSON conversion: $!");
+  open($SNPS, '<', $snpsfile) or croak("Error opening allele count locus file for JSON conversion: $!");
     while(<$SNPS>){
       my $line = $_;
       next if($line =~ m/^\s*#/);
@@ -65,7 +65,7 @@ sub alleleCountToJson{
       my ($chr,$pos,$name,undef) = split(/\s+/,$line);
       $snp_list->{$chr}->{$pos} = $name;
     }
-  close($SNPS) or $log->logcroak("Error closing allele count locus file for JSON conversion: $!");
+  close($SNPS) or croak("Error closing allele count locus file for JSON conversion: $!");
 
   my $fh = new IO::Zlib;
   if($fh->open($countsfile, "rb")){
@@ -80,7 +80,7 @@ sub alleleCountToJson{
     }
     $fh->close;
   }else{
-    $log->logcroak("Error trying to open file for SNP locus loading: $countsfile\n");
+    croak("Error trying to open file for SNP locus loading: $countsfile\n");
   }
   my $jsonstr = encode_json($tmp);
   return $jsonstr;

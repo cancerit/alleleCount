@@ -41,9 +41,9 @@ sub run {
   my ($options) = @_;
   my $json_string = Sanger::CGP::AlleleCount::ToJson->alleleCountToJson($options->{'a'}, $options->{'l'});
   my $OUT;
-  open($OUT, '>', $snpsfile) or $log->logcroak("Error opening file for output: $!");
+  open($OUT, '>', $snpsfile) or croak("Error opening file for output: $!");
     print $OUT "$json_string";
-    close($OUT) or $log->logcroak("Error closing output file for JSON conversion: $!");
+    close($OUT) or croak("Error closing output file for JSON conversion: $!");
 }
 
 
