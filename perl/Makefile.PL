@@ -38,5 +38,6 @@ WriteMakefile(
                      'Devel::Cover' => 1.09,
                      'Pod::Coverage' => 0.23,
                      'IPC::System::Simple' => 1.25,
+                     'JSON' =>  2.90,
                    }
 );
