@@ -37,35 +37,36 @@ use Sanger::CGP::AlleleCount::ToJson;
   $options->{'o'} = '/dev/stdout' unless(defined $options->{'o'});
   run($options);
 }
+
 sub run {
   my ($options) = @_;
   my $json_string = Sanger::CGP::AlleleCount::ToJson->alleleCountToJson($options->{'a'}, $options->{'l'});
   my $OUT;
   open($OUT, '>', $snpsfile) or croak("Error opening file for output: $!");
     print $OUT "$json_string";
-    close($OUT) or croak("Error closing output file for JSON conversion: $!");
+  close($OUT) or croak("Error closing output file for JSON conversion: $!");
 }
 
 
 sub option_builder {
-	my ($factory) = @_;
+  my ($factory) = @_;
 
-	my %opts;
+  my %opts;
 
-	&GetOptions (
+  &GetOptions (
         'h|help'    => \$opts{'h'},
         'l|locus-file=s' => \$opts{'l'},
         'a|allelecount-file=s' => \$opts{'a'},
         'v|version'   => \$opts{'v'},
-	);
+  );
 
-	pod2usage(0) if($opts{'h'});
+  pod2usage(0) if($opts{'h'});
   if($opts{'v'}){
     print Sanger::CGP::AlleleCount->VERSION."\n";
     exit;
   }
-	pod2usage(1) if(!$opts{'l'} || !$opts{'a'});
-	return \%opts;
+  pod2usage(1) if(!$opts{'l'} || !$opts{'a'});
+  return \%opts;
 }
 
 __END__
