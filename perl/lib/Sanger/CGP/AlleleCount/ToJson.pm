@@ -57,7 +57,6 @@ Convert allele count file result format to JSON
 sub alleleCountToJson{
   my ($countsfile, $snpsfile) = @_;
   my $tmp;
-  my $FH;
   my $SNPS;
   my $snp_list;
 
