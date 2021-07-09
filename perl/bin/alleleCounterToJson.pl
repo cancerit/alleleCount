@@ -67,6 +67,8 @@ sub option_builder {
     exit;
   }
   pod2usage(1) if(!$opts{'l'} || !$opts{'a'});
+  croak("Locus file ".$opts{'l'}." does not exist.") if(! -e $opts{'l'});
+  croak("Allele count output file ".$opts{'a'}." does not exist.") if(! -e $opts{'a'});
   return \%opts;
 }
 
