@@ -41,7 +41,7 @@ const my %ALLELECOUNT_CONST => (
 );
 
 sub allelecount_val {
-  my ($class, $item) = @_;
+  my ($item) = @_;
   return $ALLELECOUNT_CONST{$item};
 }
 
