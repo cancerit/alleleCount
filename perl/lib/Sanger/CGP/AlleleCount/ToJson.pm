@@ -122,7 +122,7 @@ sub _calculate_genotype_from_allele_count{
     @counts = sort {$b->[1]<=>$a->[1]}  @counts; # reverse sorts by the counts
     $geno = join(q{}, sort {$a cmp $b} $counts[0][0], $counts[1][0]); # then sort the alleles into the string
   }
-  $log->logcroak("Error calculating genotype from allele counts $a_a,$a_c,$a_g,$a_t,$good.\n") if((length $geno)>2 || (length $geno) == 0);
+  croak("Error calculating genotype from allele counts $a_a,$a_c,$a_g,$a_t,$good.\n") if((length $geno)>2 || (length $geno) == 0);
   return $geno;
 
 }
