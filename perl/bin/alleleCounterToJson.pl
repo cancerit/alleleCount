@@ -40,7 +40,7 @@ use Sanger::CGP::AlleleCount::ToJson;
 
 sub run {
   my ($options) = @_;
-  my $json_string = Sanger::CGP::AlleleCount::ToJson->alleleCountToJson($options->{'a'}, $options->{'l'});
+  my $json_string = Sanger::CGP::AlleleCount::ToJson::alleleCountToJson($options->{'a'}, $options->{'l'});
   my $OUT;
   open($OUT, '>', $options->{'o'}) or croak("Error opening file for output: $!");
     print $OUT "$json_string";
