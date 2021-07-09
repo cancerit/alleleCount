@@ -35,6 +35,16 @@ use Sanger::CGP::AlleleCount;
 
 use Const::Fast qw(const);
 
+const my %ALLELECOUNT_CONST => (
+  MIN_PROP => 0.21,
+  MIN_READS => 5,
+);
+
+sub allelecount_val {
+  my ($class, $item) = @_;
+  return $ALLELECOUNT_CONST{$item};
+}
+
 =item new
 
 Null constructor
@@ -88,6 +98,33 @@ sub alleleCountToJson{
   }
   my $jsonstr = encode_json($tmp);
   return $jsonstr;
+}
+
+sub _calculate_genotype_from_allele_count{
+  my ($a_a,$a_c,$a_g,$a_t,$good) = @_;
+  my $geno;
+  return q{.} if($good < allelecount_val('MIN_READS'));
+
+  my @counts;
+  push @counts, ['A', $a_a] if($a_a/$good >= allelecount_val('MIN_PROP'));
+  push @counts, ['C', $a_c] if($a_c/$good >= allelecount_val('MIN_PROP'));
+  push @counts, ['G', $a_g] if($a_g/$good >= allelecount_val('MIN_PROP'));
+  push @counts, ['T', $a_t] if($a_t/$good >= allelecount_val('MIN_PROP'));
+
+  my $entries = scalar @counts;
+  if($entries == 0) {
+    $geno = q{.};
+  }
+  elsif($entries == 1) {
+    $geno = $counts[0][0].$counts[0][0];
+  }
+  else {
+    @counts = sort {$b->[1]<=>$a->[1]}  @counts; # reverse sorts by the counts
+    $geno = join(q{}, sort {$a cmp $b} $counts[0][0], $counts[1][0]); # then sort the alleles into the string
+  }
+  $log->logcroak("Error calculating genotype from allele counts $a_a,$a_c,$a_g,$a_t,$good.\n") if((length $geno)>2 || (length $geno) == 0);
+  return $geno;
+
 }
 
 1;
