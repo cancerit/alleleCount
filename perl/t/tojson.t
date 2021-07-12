@@ -61,7 +61,7 @@ my $ac_output = "$data_root/test_ac_out.txt";
 
 my $obj = new_ok($MOD); # no options
 
-is($EXP_JSON, Sanger::CGP::AlleleCount::ToJson::alleleCountToJson($ac_output, $snpsfile), "Check conversion to JSON"); 
+is($EXP_JSON, Sanger::CGP::AlleleCount::ToJson::alleleCountToJson($ac_output, $loci), "Check conversion to JSON"); 
 
 done_testing();
 
