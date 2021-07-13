@@ -1,5 +1,9 @@
 # CHANGES
 
+## v4.3.0
+
+* Add script to convert allelecount output to JSON
+
 ## v4.2.1
 
 * Update so docker and native install use same install scripts behind the scenes
