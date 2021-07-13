@@ -42,9 +42,13 @@ sub run {
   my ($options) = @_;
   my $json_string = Sanger::CGP::AlleleCount::ToJson::alleleCountToJson($options->{'a'}, $options->{'l'});
   my $OUT;
-  open($OUT, '>', $options->{'o'}) or croak("Error opening file for output: $!");
-    print $OUT "$json_string";
-  close($OUT) or croak("Error closing output file for JSON conversion: $!");
+  if($options->{'o'}){
+    open($OUT, '>', $options->{'o'}) or croak("Error opening file for output: $!");
+  }
+  print $OUT "$json_string";
+  if($options->{'o'}){ 
+    close($OUT) or croak("Error closing output file for JSON conversion: $!");
+  }
 }
 
 
@@ -57,7 +61,7 @@ sub option_builder {
         'h|help'    => \$opts{'h'},
         'l|locus-file=s' => \$opts{'l'},
         'a|allelecount-file=s' => \$opts{'a'},
-        'o|output-file=s' => \$opts{'o'},
+        'o|output-file:s' => \$opts{'o'},
         'v|version'   => \$opts{'v'},
   );
 
