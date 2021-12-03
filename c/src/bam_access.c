@@ -38,6 +38,7 @@ int include_dup = 0;
 int include_se = 0;
 int min_base_qual = 20;
 int min_map_qual = 35;
+int end_c=5; // might want to change default to 0.
 int inc_flag = 3;
 int exc_flag = 3852;
 int maxitercnt = 1000000000; //Overrride internal maxcnt for iterator!
@@ -118,9 +119,26 @@ void pileupCounts(const bam_pileup1_t *pil, int n_plp, loci_stats *stats){
 	for(i=0;i<n_plp;i++){
 		const bam_pileup1_t *p = pil + i;
 		int qual = bam_get_qual(p->b)[p->qpos];
+		//printf("Read posis %d\n" , p->qpos);
+		//printf("Read posis %d\n" , p->b->query->length);
+		int read_pos=p->qpos;
+		//printf("Read posis %d\n" ,read_pos);
+		//printf("End clip %d\n" ,end_c);
+		//the_seq=bam_get_seq(p->b);
+		uint32_t len = p->b->core.l_qseq;
+		int clip_it=0;
+		//skip if position is is less than is defined by the -e paramater
+		if(read_pos<end_c || read_pos>(len-end_c-1))
+		{
+			clip_it=1;
+			continue;
+		}
+
+		
 		uint8_t c = bam_seqi(bam_get_seq(p->b), p->qpos);
+		
 		int absent;
-    k = kh_put(strh, h, bam_get_qname(p->b), &absent);
+    		k = kh_put(strh, h, bam_get_qname(p->b), &absent);
 		uint8_t pre_b;
 		if(!absent){ //Read already processed to get base processed (we only increment if base is different between overlapping read pairs)
 			k = kh_get(strh, h, bam_get_qname(p->b));
@@ -341,6 +359,7 @@ int bam_access_get_multi_position_base_counts(loci_stats **stats, int stats_coun
        uint8_t *aux_val_bcode;
        uint8_t *aux_val_umi;
        //printf("Got another read \n");
+		  
 	    if(b->core.qual < min_map_qual || (b->core.flag & exc_flag) || (b->core.flag & inc_flag) != inc_flag) continue;
         //Additional check for properly paired reads - they must be in correct paired end orientation
         if(inc_flag & BAM_FPROPER_PAIR){
@@ -489,6 +508,11 @@ void bam_access_min_base_qual(int qual){
 
 void bam_access_min_map_qual(int qual){
 	min_map_qual = qual;
+	return;
+}
+
+void bam_access_end_clip(int bases){
+	end_c = bases;
 	return;
 }
 
