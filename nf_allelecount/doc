@@ -1,0 +1,3 @@
+usage: nextflow run allelecount.nf
+
+inputs/options/parameters to be configured in args.config (more detail there)
