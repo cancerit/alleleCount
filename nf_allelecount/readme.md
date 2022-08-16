@@ -1,6 +1,6 @@
-# Generic NextFlow wrapper for allelecounter
+# Generic NextFlow wrapper for alleleCount
 
-A very simple nextflow wrapper for allelecount. Runs allelecount v4.3.0 in a singularity container located at `docker://quay.io/wtsicgp/allelecount:v4.3.0`.
+A very simple nextflow wrapper for alleleCount. Runs alleleCount v4.3.0 in a singularity container located at `docker://quay.io/wtsicgp/allelecount:v4.3.0`.
 
 ### Requirements
 
@@ -13,5 +13,7 @@ A very simple nextflow wrapper for allelecount. Runs allelecount v4.3.0 in a sin
 
 `nextflow run allelecount.nf`
 
-Pass inputs and options to allelecounter via `user_args.config`. Also includes relevant runtime options for singularity.
+Pass inputs and options to alleleCount via `user_args.config`. Also includes relevant runtime options for singularity.
+
+See alleleCount documentation for further information
 
