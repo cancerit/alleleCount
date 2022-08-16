@@ -11,7 +11,7 @@ process alleleCount {
   script:
   """
   trap 'exit 1' SIGINT  
-  alleleCounter $params.opts -l $params.loci -b $params.hts -o $params.out 
+  alleleCounter $params.opts -l $params.locipath -b $params.htspath -o $params.outpath 
   """
   
 }
