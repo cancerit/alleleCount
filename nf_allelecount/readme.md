@@ -14,5 +14,5 @@ A very simple nextflow wrapper for alleleCount. Runs alleleCount v4.3.0 in a sin
 `nextflow run allelecount.nf`
 
 Pass inputs and options to the container and alleleCount via `nextflow.config`.
-See `nextflow.config` for further information, and alleleCount documentation for alleleCount options.
+See `nextflow.config` for further usage information, and alleleCount documentation for alleleCount options.
 
