@@ -13,7 +13,6 @@ A very simple nextflow wrapper for alleleCount. Runs alleleCount v4.3.0 in a sin
 
 `nextflow run allelecount.nf`
 
-Pass inputs and options to alleleCount via `user_args.config`. Also includes relevant runtime options for singularity.
-
-See alleleCount documentation for further information
+Pass inputs and options to the container and alleleCount via `nextflow.config`.
+See `nextflow.config` for further information, and alleleCount documentation for alleleCount options.
 
